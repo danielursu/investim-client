@@ -1,0 +1,43 @@
+# .windsurfrules
+
+- DO NOT DELETE CODE IF I NOT SPECIFY TO DO SO
+- THE APP WILL BE MOBILE ONLY
+- ADD COMPONENTS FROM SHADCN LIBRARY WHEN NEEDED FROM `npm install @shadcn/ui`
+- WORK MODULAR
+- USE FONT 'Inter'
+
+## General Code Style & Formatting
+- Follow the Airbnb Style Guide for consistent code formatting.
+- Use PascalCase for React component filenames (e.g., Header.tsx, UserCard.tsx).
+- Prefer named exports and modern ES/TS syntax.
+- Enforce strict typing with TypeScript throughout the project.
+
+## Project Structure & Architecture
+- Use Next.js App Router (Next.js v15.2.4) guidelines for routing and file organization.
+- Place global UI components in a dedicated /components directory.
+- Co-locate page-specific components within the /app directory alongside their routes.
+- Use /app/api for server actions and API routes.
+- Separate business logic from presentation by creating dedicated service modules.
+
+## Styling & UI
+- Use Tailwind CSS (v3.4.17) for all styling tasks and design implementation.
+- Leverage Tailwind’s JIT compiler by keeping class names static where possible.
+- Utilize Radix UI components to ensure accessible and consistent UI behavior.
+- Use utility libraries like clsx and tailwind-merge for conditional class handling.
+
+## State Management & Data Handling
+- Manage global state using React Context or other state management solutions when needed.
+- Handle forms with React Hook Form paired with @hookform/resolvers.
+- Validate data and schemas with Zod (v3.24.1) to ensure type safety.
+- Use built-in Next.js data fetching methods, with an option to integrate TanStack Query if needed.
+
+## Development & Documentation Practices
+- Integrate ESLint (with Next.js’s default settings) and Prettier for code consistency.
+- Document key components, hooks, and service modules clearly using inline comments or JSDoc.
+- Maintain updated project documentation and ensure business logic is clearly separated.
+- Regularly update this file as project conventions or dependencies evolve.
+
+## Miscellaneous Guidelines
+- Use next-themes to manage application theming (light/dark modes) consistently.
+- Optimize performance by prioritizing server components and static generation where applicable.
+- Follow Makerkit conventions for organizing your code, which can help streamline complex projects.
