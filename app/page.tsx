@@ -25,6 +25,7 @@ import PerformanceChart from "@/components/ui/PerformanceChart"
 import Image from "next/image"
 import { GoalCard } from "@/components/ui/GoalCard"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
+import { MobileNavBar } from "@/components/ui/MobileNavBar"
 
 const AssetAllocationChart = () => {
   const allocations = [
@@ -461,24 +462,7 @@ export default function InvestimClient() {
       )}
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-3">
-        <Button variant="ghost" className="flex flex-col items-center h-auto py-0">
-          <Home className="h-5 w-5 mb-1" />
-          <span className="text-xs">Home</span>
-        </Button>
-        <Button variant="ghost" className="flex flex-col items-center h-auto py-0">
-          <BarChart3 className="h-5 w-5 mb-1" />
-          <span className="text-xs">Invest</span>
-        </Button>
-        <Button variant="ghost" className="flex flex-col items-center h-auto py-0">
-          <Target className="h-5 w-5 mb-1" />
-          <span className="text-xs">Goals</span>
-        </Button>
-        <Button variant="ghost" className="flex flex-col items-center h-auto py-0">
-          <Settings className="h-5 w-5 mb-1" />
-          <span className="text-xs">Settings</span>
-        </Button>
-      </div>
+      <MobileNavBar />
     </div>
   )
 }
