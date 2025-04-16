@@ -296,7 +296,12 @@ export default function InvestimClient() {
               <Card>
                 <CardHeader className="pb-1 pt-2">
                   <CardTitle className="text-base">Growth Trend</CardTitle>
-                  <CardDescription>Last 12 months</CardDescription>
+                  <div className="flex justify-end gap-x-2 mt-1">
+                    <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">1M</Button>
+                    <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">3M</Button>
+                    <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">6M</Button>
+                    <Button size="sm" className="h-7 px-2 text-xs rounded" variant="default">12M</Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <PerformanceChart />
