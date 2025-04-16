@@ -17,11 +17,14 @@ import {
   Target,
   TrendingUp,
   X,
+  Shield,
+  Info,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import PerformanceChart from "@/components/ui/PerformanceChart"
 import Image from "next/image"
 import { GoalCard } from "@/components/ui/GoalCard"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 
 const AssetAllocationChart = () => {
   const allocations = [
@@ -279,30 +282,52 @@ export default function InvestimClient() {
               <TabsTrigger value="history">History</TabsTrigger>
             </TabsList>
             <TabsContent value="overview">
-              <Card>
-                <CardHeader className="pb-1 pt-2">
-                  <CardTitle className="text-base">Growth Trend</CardTitle>
-                  <div className="flex justify-end gap-x-2 mt-1">
-                    <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">1M</Button>
-                    <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">3M</Button>
-                    <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">6M</Button>
-                    <Button size="sm" className="h-7 px-2 text-xs rounded" variant="default">12M</Button>
+              <TooltipProvider>
+                <Card className="mb-2 shadow-md rounded-2xl border-none bg-white">
+                  <div className="px-4 pt-4 pb-1">
+                    <CardTitle className="text-base font-semibold text-gray-900">Growth Trend</CardTitle>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <PerformanceChart />
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="space-y-1">
-                      <p className="text-sm text-gray-500">Annual Return</p>
-                      <p className="text-lg font-bold text-emerald-600">+12.4%</p>
+                  <CardContent className="pt-1">
+                    <div className="flex justify-end gap-x-2 mt-1 mb-4">
+                      <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">1M</Button>
+                      <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">3M</Button>
+                      <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">6M</Button>
+                      <Button size="sm" className="h-7 px-2 text-xs rounded" variant="default">12M</Button>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-gray-500">Risk Level</p>
-                      <p className="text-lg font-bold">Moderate</p>
+                    <PerformanceChart />
+                    <div className="flex justify-evenly items-center mt-4">
+                      <div className="flex flex-row items-center gap-2 w-32 justify-center">
+                        <TrendingUp className="h-5 w-5 text-emerald-700" />
+                        <span className="font-semibold text-black text-lg">+12.4%</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span tabIndex={0} aria-label="Annual Return Info">
+                              <Info className="h-4 w-4 text-gray-700 cursor-pointer" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            The percentage gain or loss on your portfolio over the past year.
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <div className="flex flex-row items-center gap-2 w-32 justify-center">
+                        <Shield className="h-5 w-5 text-emerald-700" />
+                        <span className="font-semibold text-black text-lg">Moderate</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span tabIndex={0} aria-label="Risk Level Info">
+                              <Info className="h-4 w-4 text-gray-700 cursor-pointer" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            An assessment of your portfolio's volatility and potential for loss.
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </TooltipProvider>
             </TabsContent>
             <TabsContent value="allocation">
               <Card>
