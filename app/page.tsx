@@ -21,6 +21,7 @@ import {
 import { useState, useEffect } from "react"
 import PerformanceChart from "@/components/ui/PerformanceChart"
 import Image from "next/image"
+import { GoalCard } from "@/components/ui/GoalCard"
 
 const AssetAllocationChart = () => {
   const allocations = [
@@ -246,51 +247,22 @@ export default function InvestimClient() {
             </Button>
           </div>
 
-          <Card className="mb-2">
-            <CardHeader className="pb-1 pt-2">
-              <div className="flex justify-between">
-                <CardTitle className="text-base">Retirement Fund</CardTitle>
-                <Target className="h-5 w-5 text-emerald-500" />
-              </div>
-              <CardDescription>Target: $500,000 by 2045</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Progress</span>
-                  <span className="font-medium">42%</span>
-                </div>
-                <Progress value={42} className="h-2" />
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>$210,000</span>
-                  <span>$500,000</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="mb-2">
-            <CardHeader className="pb-1 pt-2">
-              <div className="flex justify-between">
-                <CardTitle className="text-base">Home Down Payment</CardTitle>
-                <Home className="h-5 w-5 text-emerald-500" />
-              </div>
-              <CardDescription>Target: $60,000 by 2026</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Progress</span>
-                  <span className="font-medium">78%</span>
-                </div>
-                <Progress value={78} className="h-2" />
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>$46,800</span>
-                  <span>$60,000</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <GoalCard
+            title="Retirement Fund"
+            icon={<Target className="h-5 w-5 text-emerald-500" />}
+            targetDescription="Target: $500,000 by 2045"
+            progressPercent={42}
+            currentAmount="$210,000"
+            targetAmount="$500,000"
+          />
+          <GoalCard
+            title="Home Down Payment"
+            icon={<Home className="h-5 w-5 text-emerald-500" />}
+            targetDescription="Target: $60,000 by 2026"
+            progressPercent={78}
+            currentAmount="$46,800"
+            targetAmount="$60,000"
+          />
 
           <Button variant="outline" className="w-full border-dashed border-gray-300 text-gray-500">
             <Plus className="h-4 w-4 mr-2" /> Add New Goal
