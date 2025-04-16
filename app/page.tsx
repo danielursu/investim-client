@@ -200,7 +200,7 @@ export default function InvestimClient() {
                 <p className="text-gray-500 text-sm">Your portfolio is growing steadily</p>
               </div>
               <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-                <AvatarImage src="/placeholder.svg?height=48&width=48" alt="User" />
+                <AvatarImage src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=48&h=48&facepad=2" alt="User" />
                 <AvatarFallback>AP</AvatarFallback>
               </Avatar>
             </div>
@@ -379,7 +379,16 @@ export default function InvestimClient() {
           <div className="p-3 border-b flex justify-between items-center bg-emerald-600 text-white rounded-t-lg">
             <div className="flex items-center">
               <Avatar className="h-8 w-8 mr-2 bg-white/20">
-                <AvatarFallback>AI</AvatarFallback>
+                <AvatarFallback>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-emerald-600">
+                    <path d="M12 6V2H8"></path>
+                    <path d="m8 18-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M9 11v2"></path>
+                    <path d="M15 11v2"></path>
+                    <path d="M20 12h2"></path>
+                  </svg>
+                </AvatarFallback>
               </Avatar>
               <span className="font-medium">Financial Assistant</span>
             </div>
