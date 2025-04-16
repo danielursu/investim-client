@@ -243,7 +243,7 @@ export default function InvestimClient() {
         </div>
 
         {/* Investment Goals */}
-        <div className="p-3 pt-1">
+        <div className="p-3 pt-1 mt-6">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold">Your Goals</h2>
             <Button variant="ghost" size="sm" className="text-emerald-600 h-8 px-2">
@@ -274,10 +274,10 @@ export default function InvestimClient() {
         </div>
 
         {/* Performance Tabs */}
-        <div className="p-3 pt-1">
-          <h2 className="text-lg font-bold mb-2">Portfolio Performance</h2>
+        <div className="p-3 pt-1 mt-6">
+          <h2 className="text-lg font-bold">Portfolio Performance</h2>
           <Tabs defaultValue="overview">
-            <TabsList className="grid grid-cols-3 mb-4">
+            <TabsList className="grid grid-cols-3 mb-4 mt-2">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="allocation">Allocation</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
@@ -331,23 +331,21 @@ export default function InvestimClient() {
               </TooltipProvider>
             </TabsContent>
             <TabsContent value="allocation">
-              <Card>
-                <CardHeader className="pb-1 pt-3">
-                  <CardTitle className="text-lg">Asset Allocation</CardTitle>
-                  <CardDescription>Current distribution</CardDescription>
-                </CardHeader>
-                <CardContent>
+              <Card className="mb-2 shadow-md rounded-2xl border-none bg-white">
+                <div className="px-4 pt-4 pb-1">
+                  <CardTitle className="text-base font-semibold text-gray-900">Asset Allocation</CardTitle>
+                </div>
+                <CardContent className="pt-1">
                   <AssetAllocationChart />
                 </CardContent>
               </Card>
             </TabsContent>
             <TabsContent value="history">
-              <Card>
-                <CardHeader className="pb-1 pt-2">
-                  <CardTitle className="text-base">Transaction History</CardTitle>
-                  <CardDescription>Recent activities</CardDescription>
-                </CardHeader>
-                <CardContent>
+              <Card className="mb-2 shadow-md rounded-2xl border-none bg-white">
+                <div className="px-4 pt-4 pb-1">
+                  <CardTitle className="text-base font-semibold text-gray-900">Transaction History</CardTitle>
+                </div>
+                <CardContent className="pt-1">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <div>
