@@ -1,0 +1,17 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+  environment = { NODE_VERSION = "20" }
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[dev]
+  command = "next dev"
+  port = 3000
+
+[functions]
+  directory = "netlify/functions"
+
+[framework]
+  name = "nextjs"
