@@ -27,6 +27,7 @@ import { GoalCard } from "@/components/ui/GoalCard"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { MobileNavBar } from "@/components/ui/MobileNavBar"
 import { Chatbot } from "@/components/Chatbot"
+import GoalManager from '@/components/GoalManager';
 
 const AssetAllocationChart = () => {
   const allocations = [
@@ -269,9 +270,7 @@ export default function InvestimClient() {
             targetAmount="$60,000"
           />
 
-          <Button variant="outline" className="w-full border-dashed border-gray-300 text-gray-500">
-            <Plus className="h-4 w-4 mr-2" /> Add New Goal
-          </Button>
+          <GoalManager />
         </div>
 
         {/* Performance Tabs */}
