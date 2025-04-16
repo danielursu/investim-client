@@ -8,9 +8,20 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Plus, Target } from "lucide-react"
+import { Plus } from "lucide-react"
 import { AddGoalForm, GoalFormValues } from "@/components/AddGoalForm"
 import { GoalCard } from "@/components/ui/GoalCard"
+import { Home, Target, Car, Book, Gift, Circle } from "lucide-react"
+
+// Map icon name to Lucide icon JSX
+const ICON_MAP: Record<string, JSX.Element> = {
+  home: <Home className="h-5 w-5" color="#079669" />,
+  target: <Target className="h-5 w-5" color="#079669" />,
+  car: <Car className="h-5 w-5" color="#079669" />,
+  book: <Book className="h-5 w-5" color="#079669" />,
+  gift: <Gift className="h-5 w-5" color="#079669" />,
+  circle: <Circle className="h-5 w-5" color="#079669" />,
+}
 
 export default function GoalManager() {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -29,7 +40,7 @@ export default function GoalManager() {
           <GoalCard
             key={idx}
             title={goal.name}
-            icon={<Target className="h-5 w-5 text-blue-500" />} 
+            icon={ICON_MAP[goal.icon] || ICON_MAP.circle}
             targetDescription={`Target: $${goal.amount} by ${goal.targetDate}`}
             progressPercent={0}
             currentAmount="$0"
