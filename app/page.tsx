@@ -253,24 +253,26 @@ export default function InvestimClient() {
             </Button>
           </div>
 
-          <GoalCard
-            title="Retirement Fund"
-            icon={<Target className="h-5 w-5 text-emerald-500" />}
-            targetDescription="Target: $500,000 by 2045"
-            progressPercent={42}
-            currentAmount="$210,000"
-            targetAmount="$500,000"
+          <GoalManager 
+            initialGoals={[
+              {
+                name: "Retirement Fund",
+                icon: "target",
+                amount: "500,000",
+                targetDate: "2045",
+                progressPercent: 42,
+                currentAmount: "210,000"
+              },
+              {
+                name: "Home Down Payment",
+                icon: "home",
+                amount: "60,000",
+                targetDate: "2026",
+                progressPercent: 78,
+                currentAmount: "46,800"
+              }
+            ]}
           />
-          <GoalCard
-            title="Home Down Payment"
-            icon={<Home className="h-5 w-5 text-emerald-500" />}
-            targetDescription="Target: $60,000 by 2026"
-            progressPercent={78}
-            currentAmount="$46,800"
-            targetAmount="$60,000"
-          />
-
-          <GoalManager />
         </div>
 
         {/* Performance Tabs */}
