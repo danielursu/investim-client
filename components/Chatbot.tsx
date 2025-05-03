@@ -6,6 +6,10 @@ import { X, BotMessageSquare, User } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { RiskQuizQuestion } from './RiskQuizQuestion';
 import { AssetAllocationChart } from "@/components/ui/AssetAllocationChart";
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
 interface ChatbotProps {
   open: boolean
@@ -132,8 +136,6 @@ export const Chatbot: FC<ChatbotProps> = ({ open, onClose, userAvatarUrl }) => {
     }
   }, [open]);
 
-  if (!open) return null;
-
   const askRag = async (query: string): Promise<RagResponse> => {
     const res = await fetch("/api/rag", {
       method: "POST",
@@ -253,6 +255,10 @@ export const Chatbot: FC<ChatbotProps> = ({ open, onClose, userAvatarUrl }) => {
     }, 500); // Simulate processing time
   };
 
+  console.log('Chatbot messages:', messages);
+
+  if (!open) return null;
+
   return (
     <div className="fixed bottom-16 right-4 w-[calc(100%-2rem)] max-w-md bg-white rounded-lg shadow-xl border border-gray-200 max-h-[70vh] flex flex-col z-50 font-inter">
       <div className="p-3 border-b flex justify-between items-center bg-emerald-600 text-white rounded-t-lg">
@@ -283,15 +289,31 @@ export const Chatbot: FC<ChatbotProps> = ({ open, onClose, userAvatarUrl }) => {
               />
             ) : (
               <div
-                className={`rounded-lg px-3 py-2 max-w-[80%] shadow-sm text-sm whitespace-pre-line relative ${msg.role === "user"
-                    ? "bg-emerald-600 text-white ml-auto"
-                    : "bg-white text-gray-900"
-                  } animate-fadeIn`}
+                className={`rounded-lg px-3 py-2 max-w-[80%] shadow-sm text-sm ${msg.role === "user" ? "bg-emerald-600 text-white" : "bg-white text-gray-900"} font-inter prose prose-sm max-w-none break-words`}
               >
-                {msg.content}
-                {msg.role === "bot" && msg.sources && msg.sources.length > 0 && (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={{
+                    a: ({node, ...props}) => (
+                      <a {...props} className="text-emerald-600 underline" target="_blank" rel="noopener noreferrer" />
+                    ),
+                    code: ({node, ...props}) => (
+                      <code {...props} className="bg-gray-100 dark:bg-gray-800 rounded px-1 text-[13px]" />
+                    ),
+                    ul: ({node, ...props}) => (
+                      <ul {...props} className="list-disc ml-5" />
+                    ),
+                    ol: ({node, ...props}) => (
+                      <ol {...props} className="list-decimal ml-5" />
+                    ),
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+                {msg.sources && msg.sources.length > 0 && (
                   <Collapsible className="mt-2">
-                    <CollapsibleTrigger className="text-xs text-emerald-700 underline cursor-pointer">Sources</CollapsibleTrigger>
+                    <CollapsibleTrigger className="text-xs text-emerald-600 underline">Sources</CollapsibleTrigger>
                     <CollapsibleContent className="mt-1">
                       <ul className="text-xs space-y-1">
                         {msg.sources.map((src, i) => (
