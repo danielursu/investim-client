@@ -142,50 +142,70 @@ export const Chatbot: FC<ChatbotProps> = ({ open, onClose, userAvatarUrl }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query }),
     })
-    if (!res.ok) throw new Error(await res.text())
-    return res.json()
+    if (!res.ok) {
+      let errorBody = "Failed to fetch response from the assistant.";
+      try {
+        // Try to parse the error response body as JSON
+        const errorJson = await res.json();
+        // If it has an 'error' property, use that as the message
+        if (errorJson && typeof errorJson.error === 'string') {
+          errorBody = `Assistant error: ${errorJson.error}`;
+        } else {
+           // Fallback if JSON is not as expected or doesn't contain 'error'
+           errorBody = `Received status ${res.status}: ${res.statusText}`;
+        }
+      } catch (parseError) {
+        // If parsing fails, use the raw text or a generic message
+        try {
+          const rawText = await res.text();
+          errorBody = rawText || errorBody; // Use raw text if available
+        } catch (textError) {
+            // Ignore text error, keep the default message
+        }
+      }
+      throw new Error(errorBody); // Throw the refined error message
+    }
+    return res.json() as Promise<RagResponse>; // Added type assertion
   }
 
   const handleAsk = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!question.trim() || loading || currentQuizQuestionIndex !== null) return;
 
-    setLoading(true);
-    setError("");
-    const userMsg: ChatMessage = {
+    const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       type: 'text',
       role: "user",
       content: question,
       timestamp: new Date(),
-    };
-    setMessages((msgs) => [...msgs, userMsg]);
-    const currentQuestion = question; 
-    setQuestion("");
+    }
+
+    setMessages(prevMessages => [...prevMessages, userMessage])
+    setLoading(true)
+    setError("") // Clear previous error
+    const currentQuestion = question; // Store question before clearing
+    setQuestion("") // Clear input immediately
 
     try {
-      const data = await askRag(currentQuestion);
-      const botMsg: ChatMessage = {
+      const response = await askRag(currentQuestion) // Use stored question
+
+      const botMessage: ChatMessage = {
         id: `bot-${Date.now()}`,
         type: 'text',
         role: "bot",
-        content: data.answer,
-        sources: Array.isArray(data.sources) ? data.sources : [],
+        content: response.answer || "Sorry, I received an empty response.", // Handle empty answer
+        sources: response.sources || [],
         timestamp: new Date(),
-      };
-      setMessages((msgs) => [...msgs, botMsg]);
-    } catch (err) {
-      setError((err as Error).message);
-      const errorMsg: ChatMessage = {
-        id: `error-${Date.now()}`,
-        type: 'text',
-        role: "bot", 
-        content: `Sorry, an error occurred: ${(err as Error).message}`,
-        timestamp: new Date(),
-      };
-      setMessages((msgs) => [...msgs, errorMsg]);
+      }
+      setMessages(prevMessages => [...prevMessages, botMessage])
+
+    } catch (err: any) {
+      console.error("Error asking RAG:", err)
+      // Set a user-friendly error message instead of the raw error
+      setError("Sorry, there was an issue connecting to the assistant. Please check your connection or try again later.")
+      // Ensure we don't add a broken bot message by not adding anything here
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
