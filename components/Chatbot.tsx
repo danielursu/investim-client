@@ -10,17 +10,12 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
-import { COLORS } from '@/constants/colors';
 import { moderateAllocation } from '@/data/portfolio-allocations';
 import { riskQuizQuestions } from '@/data/risk-quiz-questions';
 import { 
   ChatbotProps, 
-  QuizOption, 
-  QuizQuestionData, 
-  AllocationItem, 
   AssetAllocationData, 
   ChatMessage, 
-  RagSource, 
   RagResponse,
   ChatbotApiError
 } from '@/types';
