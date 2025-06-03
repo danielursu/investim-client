@@ -28,136 +28,23 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/comp
 import { MobileNavBar } from "@/components/ui/MobileNavBar"
 import { Chatbot } from "@/components/Chatbot"
 import GoalManager from '@/components/GoalManager';
+import AssetAllocationChart from "@/components/ui/AssetAllocationChart"
+import { COLORS } from "@/constants/colors"
+import { Period } from "@/types"
 
-const AssetAllocationChart = () => {
-  const allocations = [
-    { name: "Stocks", percentage: 45, color: "#10b981" },
-    { name: "Bonds", percentage: 30, color: "#3b82f6" },
-    { name: "Real Estate", percentage: 15, color: "#f59e0b" },
-    { name: "Alternatives", percentage: 10, color: "#8b5cf6" },
-  ]
+// Asset allocation data for the chart
+const allocationData = [
+  { name: "Stocks", percentage: 45, color: COLORS.CHART.STOCKS },
+  { name: "Bonds", percentage: 30, color: COLORS.CHART.BONDS },
+  { name: "Real Estate", percentage: 15, color: COLORS.CHART.REAL_ESTATE },
+  { name: "Alternatives", percentage: 10, color: COLORS.CHART.ALTERNATIVES },
+]
 
-  const [selectedCategory, setSelectedCategory] = useState("Stocks")
-
-  const instruments = {
-    Stocks: [
-      { name: "iShares Core S&P 500 ETF", ticker: "IVV", allocation: "20%" },
-      { name: "iShares Core MSCI International Developed Markets ETF", ticker: "IDEV", allocation: "10%" },
-      { name: "iShares Core MSCI Emerging Markets ETF", ticker: "IEMG", allocation: "7%" },
-      { name: "Vanguard Small-Cap ETF", ticker: "VB", allocation: "5%" },
-      { name: "Vanguard FTSE All-World ex-US Small-Cap ETF", ticker: "VSS", allocation: "3%" },
-    ],
-    Bonds: [
-      { name: "iShares iBoxx $ Investment Grade Corporate Bond ETF", ticker: "LQD", allocation: "12%" },
-      { name: "iShares 1-3 Year Treasury Bond ETF", ticker: "SHY", allocation: "10%" },
-      { name: "iShares J.P. Morgan USD Emerging Markets Bond ETF", ticker: "EMB", allocation: "5%" },
-      { name: "iShares Floating Rate Bond ETF", ticker: "FLOT", allocation: "3%" },
-    ],
-    "Real Estate": [
-      { name: "Vanguard Real Estate ETF", ticker: "VNQ", allocation: "10%" },
-      { name: "iShares International Developed Real Estate ETF", ticker: "IFGL", allocation: "5%" },
-    ],
-    Alternatives: [
-      { name: "iShares Gold Trust", ticker: "IAU", allocation: "4%" },
-      { name: "iShares GSCI Commodity Dynamic Roll Strategy ETF", ticker: "COMT", allocation: "3%" },
-      { name: "KFA Mount Lucas Managed Futures Index Strategy ETF", ticker: "KMLM", allocation: "3%" },
-    ],
-  }
-
-  // Use useEffect to render the chart when the component mounts
-  useEffect(() => {
-    renderPieChart()
-
-    // Re-render on window resize
-    window.addEventListener("resize", renderPieChart)
-    return () => window.removeEventListener("resize", renderPieChart)
-  }, [])
-
-  const renderPieChart = () => {
-    const canvas = document.getElementById("allocation-chart")
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Clear previous chart
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Set canvas dimensions
-    canvas.width = canvas.offsetWidth * 2
-    canvas.height = canvas.offsetHeight * 2
-    ctx.scale(2, 2)
-
-    const centerX = canvas.width / 4
-    const centerY = canvas.height / 4
-    const radius = Math.min(centerX, centerY) * 0.8
-
-    let startAngle = -0.5 * Math.PI // Start from top
-
-    // Draw pie slices
-    allocations.forEach((item) => {
-      const sliceAngle = (item.percentage / 100) * 2 * Math.PI
-
-      ctx.beginPath()
-      ctx.moveTo(centerX, centerY)
-      ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle)
-      ctx.closePath()
-
-      ctx.fillStyle = item.color
-      ctx.fill()
-
-      // Add a subtle white border
-      ctx.strokeStyle = "white"
-      ctx.lineWidth = 1
-      ctx.stroke()
-
-      startAngle += sliceAngle
-    })
-  }
-
-  return (
-    <div>
-      <div className="relative h-64 w-full mb-6">
-        <canvas id="allocation-chart" className="w-full h-full"></canvas>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-4">
-        {allocations.map((item) => (
-          <button
-            key={item.name}
-            className={`flex items-center text-xs px-3 py-1.5 rounded-full ${
-              selectedCategory === item.name ? "bg-gray-200 font-medium" : "bg-gray-100"
-            }`}
-            onClick={() => setSelectedCategory(item.name)}
-          >
-            <div className="w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: item.color }}></div>
-            <span>
-              {item.name} ({item.percentage}%)
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-4">
-        <div className="text-sm font-medium mb-2">{selectedCategory} Holdings</div>
-        <div className="space-y-3">
-          {instruments[selectedCategory].map((instrument) => (
-            <div key={instrument.ticker} className="flex justify-between items-center">
-              <div>
-                <div className="font-medium">{instrument.ticker}</div>
-                <div className="text-xs text-gray-500">{instrument.name}</div>
-              </div>
-              <div className="font-medium">{instrument.allocation}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
+const PERIODS = ["1M", "3M", "6M", "12M"] as const;
 
 export default function InvestimClient() {
-  const [chatOpen, setChatOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>("12M");
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -207,7 +94,7 @@ export default function InvestimClient() {
                 <p className="text-gray-500 text-sm">Your portfolio is growing steadily</p>
               </div>
               <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-                <AvatarImage src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=48&h=48&facepad=2" alt="User" />
+                <AvatarImage src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=facearea&w=48&h=48&facepad=2" alt="User" />
                 <AvatarFallback>AP</AvatarFallback>
               </Avatar>
             </div>
@@ -292,12 +179,40 @@ export default function InvestimClient() {
                   </div>
                   <CardContent className="pt-1">
                     <div className="flex justify-end gap-x-2 mt-1 mb-4">
-                      <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">1M</Button>
-                      <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">3M</Button>
-                      <Button size="sm" className="h-7 px-2 text-xs rounded" variant="outline">6M</Button>
-                      <Button size="sm" className="h-7 px-2 text-xs rounded" variant="default">12M</Button>
+                      <Button 
+                        size="sm" 
+                        className="h-7 px-2 text-xs rounded" 
+                        variant={selectedPeriod === "1M" ? "default" : "outline"}
+                        onClick={() => setSelectedPeriod("1M")}
+                      >
+                        1M
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="h-7 px-2 text-xs rounded" 
+                        variant={selectedPeriod === "3M" ? "default" : "outline"}
+                        onClick={() => setSelectedPeriod("3M")}
+                      >
+                        3M
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="h-7 px-2 text-xs rounded" 
+                        variant={selectedPeriod === "6M" ? "default" : "outline"}
+                        onClick={() => setSelectedPeriod("6M")}
+                      >
+                        6M
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="h-7 px-2 text-xs rounded" 
+                        variant={selectedPeriod === "12M" ? "default" : "outline"}
+                        onClick={() => setSelectedPeriod("12M")}
+                      >
+                        12M
+                      </Button>
                     </div>
-                    <PerformanceChart />
+                    <PerformanceChart period={selectedPeriod} />
                     <div className="flex justify-evenly items-center mt-4">
                       <div className="flex flex-row items-center gap-2 w-32 justify-center">
                         <TrendingUp className="h-5 w-5 text-emerald-700" />
@@ -338,7 +253,7 @@ export default function InvestimClient() {
                   <CardTitle className="text-base font-semibold text-gray-900">Asset Allocation</CardTitle>
                 </div>
                 <CardContent className="pt-1">
-                  <AssetAllocationChart />
+                  <AssetAllocationChart data={allocationData} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -352,28 +267,28 @@ export default function InvestimClient() {
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium">Auto-Investment</p>
-                        <p className="text-sm text-gray-500">Apr 10, 2023</p>
+                        <p className="text-sm text-gray-500">Apr 10, 2025</p>
                       </div>
                       <p className="font-medium text-emerald-600">+$500.00</p>
                     </div>
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium">Dividend Payment</p>
-                        <p className="text-sm text-gray-500">Apr 5, 2023</p>
+                        <p className="text-sm text-gray-500">Apr 5, 2025</p>
                       </div>
                       <p className="font-medium text-emerald-600">+$78.32</p>
                     </div>
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium">Auto-Investment</p>
-                        <p className="text-sm text-gray-500">Mar 25, 2023</p>
+                        <p className="text-sm text-gray-500">Mar 25, 2025</p>
                       </div>
                       <p className="font-medium text-emerald-600">+$500.00</p>
                     </div>
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium">Portfolio Rebalance</p>
-                        <p className="text-sm text-gray-500">Mar 15, 2023</p>
+                        <p className="text-sm text-gray-500">Mar 15, 2025</p>
                       </div>
                       <p className="font-medium text-gray-500">-</p>
                     </div>

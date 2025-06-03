@@ -2,21 +2,12 @@
 
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { CHART_FALLBACK_COLORS, COLORS } from '@/constants/colors';
+import { AllocationItem, AssetAllocationChartProps } from '@/types';
 
-// Define the structure for a single allocation item (matching Chatbot.tsx)
-interface AllocationItem {
-  name: string;
-  percentage: number;
-  color?: string;
-}
+// Types now imported from shared types
 
-// Define props for the chart component
-interface AssetAllocationChartProps {
-  data: AllocationItem[]; // Expects an array of allocation items
-}
-
-// Default colors if not provided in data
-const FALLBACK_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d'];
+// Use imported fallback colors
 
 export const AssetAllocationChart: React.FC<AssetAllocationChartProps> = ({ data }) => {
   if (!data || data.length === 0) {
@@ -26,7 +17,7 @@ export const AssetAllocationChart: React.FC<AssetAllocationChartProps> = ({ data
   // Ensure data has colors, using fallbacks if necessary
   const chartData = data.map((item: AllocationItem, index: number) => ({
     ...item,
-    color: item.color || FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+    color: item.color || CHART_FALLBACK_COLORS[index % CHART_FALLBACK_COLORS.length],
   }));
 
   return (
@@ -40,7 +31,7 @@ export const AssetAllocationChart: React.FC<AssetAllocationChartProps> = ({ data
           labelLine={false}
           // label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`} // Optional: Labels on slices
           outerRadius={80} // Size of the pie
-          fill="#8884d8" // Default fill (overridden by Cell)
+          fill={COLORS.NEUTRAL} // Default fill (overridden by Cell)
           dataKey="percentage" // Value determining slice size
           nameKey="name" // Key for legend/tooltip names
         >
