@@ -1,6 +1,30 @@
 # Changelog — Investim Client
 
 ## [Unreleased]
+
+## [2025-01-03] Major Codebase Refactoring
+### Architecture Improvements
+- **Component Breakdown**: Reduced main `app/page.tsx` from 274 lines to 28 lines (90% reduction)
+- **Created Dashboard Components**: Split into 6 focused components (`UserHeader`, `PortfolioSummary`, `GoalsSection`, `PerformanceTabs`, `PeriodSelector`, `ChatInterface`)
+- **Improved File Structure**: Added organized directories for `constants/`, `types/`, `data/`, and `components/Dashboard/`
+
+### Code Quality Enhancements
+- **Eliminated Code Duplication**: Removed 143 lines of duplicate `AssetAllocationChart` implementation
+- **Centralized Configuration**: Created unified color system in `constants/colors.ts` and icon management in `constants/icons.ts`
+- **Shared Type Definitions**: Consolidated duplicate interfaces into `types/index.ts`
+- **Data Extraction**: Moved hardcoded portfolio data and quiz questions to dedicated data files
+
+### Type Safety & Error Handling
+- **Fixed TypeScript Issues**: Removed all `any` types and implemented proper error handling with custom error classes
+- **Environment Validation**: Added `lib/env.ts` with proper validation and error handling for API routes
+- **Enhanced API Security**: Improved error handling in RAG API route with sanitized error messages
+
+### Developer Experience
+- **Standardized Exports**: Converted all components to use named exports consistently
+- **Better Maintainability**: Clear separation of concerns with single responsibility components
+- **Documentation**: Created comprehensive `CLAUDE.md` for development guidance
+
+## [2025-04-16] Initial Setup & Features
 - Initial project setup with Next.js App Router and TypeScript.
 - Mobile-first UI with Tailwind CSS and Inter font.
 - Integrated chatbot with RAG backend via `/app/api/rag/route.ts`.
