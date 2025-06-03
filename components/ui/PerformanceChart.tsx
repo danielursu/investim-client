@@ -106,4 +106,4 @@ export const PerformanceChart: FC<PerformanceChartProps> = ({ period }) => {
   );
 }
 
-export default PerformanceChart;
+// Exported inline above

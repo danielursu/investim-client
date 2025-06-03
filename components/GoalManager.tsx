@@ -40,7 +40,7 @@ interface GoalManagerProps {
   initialGoals?: GoalWithProgress[];
 }
 
-export default function GoalManager({ initialGoals = [] }: GoalManagerProps) {
+export function GoalManager({ initialGoals = [] }: GoalManagerProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [goals, setGoals] = useState<GoalWithProgress[]>(initialGoals)
 

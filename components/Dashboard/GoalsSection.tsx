@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { ChevronRight } from "lucide-react"
-import GoalManager from '@/components/GoalManager'
+import { GoalManager } from '@/components/GoalManager'
 import { defaultGoals } from "@/data/portfolio-allocations"
 
 export const GoalsSection = () => {

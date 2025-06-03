@@ -49,5 +49,4 @@ export const AssetAllocationChart: React.FC<AssetAllocationChartProps> = ({ data
   );
 };
 
-// Default export
-export default AssetAllocationChart;
+// Named export for consistency

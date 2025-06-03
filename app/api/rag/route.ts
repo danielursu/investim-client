@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const FASTAPI_URL = process.env.FASTAPI_RAG_URL || 'http://127.0.0.1:8000/query';
+import { env, validateEnv, EnvValidationError } from '@/lib/env';
 
 export async function POST(req: NextRequest) {
   try {
+    // Validate environment configuration
+    validateEnv();
+    
     const body = await req.json();
     const { query } = body;
     if (!query) {
       return NextResponse.json({ error: 'Missing query' }, { status: 400 });
     }
-    const apiRes = await fetch(FASTAPI_URL, {
+    
+    const apiRes = await fetch(env.FASTAPI_RAG_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query }),
@@ -21,6 +24,14 @@ export async function POST(req: NextRequest) {
     const data = await apiRes.json();
     return NextResponse.json(data);
   } catch (error: unknown) {
+    if (error instanceof EnvValidationError) {
+      console.error('Environment validation error:', error.message);
+      return NextResponse.json(
+        { error: 'Server configuration error' }, 
+        { status: 500 }
+      );
+    }
+    
     const message = error instanceof Error ? error.message : 'Internal error';
     return NextResponse.json({ error: message }, { status: 500 });
   }
