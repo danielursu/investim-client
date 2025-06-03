@@ -31,14 +31,9 @@ import GoalManager from '@/components/GoalManager';
 import AssetAllocationChart from "@/components/ui/AssetAllocationChart"
 import { COLORS } from "@/constants/colors"
 import { Period } from "@/types"
+import { defaultAllocationData, portfolioMetrics, defaultGoals } from "@/data/portfolio-allocations"
 
-// Asset allocation data for the chart
-const allocationData = [
-  { name: "Stocks", percentage: 45, color: COLORS.CHART.STOCKS },
-  { name: "Bonds", percentage: 30, color: COLORS.CHART.BONDS },
-  { name: "Real Estate", percentage: 15, color: COLORS.CHART.REAL_ESTATE },
-  { name: "Alternatives", percentage: 10, color: COLORS.CHART.ALTERNATIVES },
-]
+// Use imported data instead of hardcoded values
 
 const PERIODS = ["1M", "3M", "6M", "12M"] as const;
 
@@ -118,12 +113,12 @@ export default function InvestimClient() {
                   className="text-3xl sm:text-4xl font-extrabold tracking-tight drop-shadow-md"
                   aria-label="Portfolio Value"
                 >
-                  $87,429.65
+                  ${portfolioMetrics.totalValue.toLocaleString()}
                 </span>
                 <div className="flex items-center gap-1 mt-1">
                   <TrendingUp className="h-4 w-4 mr-1 text-lime-200 drop-shadow-sm" aria-hidden="true" />
                   <span className="text-sm font-medium text-lime-100" aria-label="Portfolio Growth">
-                    +$1,245.23 (2.8%)
+                    +${portfolioMetrics.gain.toLocaleString()} ({portfolioMetrics.gainPercentage}%)
                   </span>
                 </div>
               </div>
@@ -140,26 +135,7 @@ export default function InvestimClient() {
             </Button>
           </div>
 
-          <GoalManager 
-            initialGoals={[
-              {
-                name: "Retirement Fund",
-                icon: "target",
-                amount: "500,000",
-                targetDate: "2045",
-                progressPercent: 42,
-                currentAmount: "210,000"
-              },
-              {
-                name: "Home Down Payment",
-                icon: "home",
-                amount: "60,000",
-                targetDate: "2026",
-                progressPercent: 78,
-                currentAmount: "46,800"
-              }
-            ]}
-          />
+          <GoalManager initialGoals={defaultGoals} />
         </div>
 
         {/* Performance Tabs */}
@@ -216,7 +192,7 @@ export default function InvestimClient() {
                     <div className="flex justify-evenly items-center mt-4">
                       <div className="flex flex-row items-center gap-2 w-32 justify-center">
                         <TrendingUp className="h-5 w-5 text-emerald-700" />
-                        <span className="font-semibold text-black text-lg">+12.4%</span>
+                        <span className="font-semibold text-black text-lg">+{portfolioMetrics.annualReturn}%</span>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span tabIndex={0} aria-label="Annual Return Info">
@@ -230,7 +206,7 @@ export default function InvestimClient() {
                       </div>
                       <div className="flex flex-row items-center gap-2 w-32 justify-center">
                         <Shield className="h-5 w-5 text-emerald-700" />
-                        <span className="font-semibold text-black text-lg">Moderate</span>
+                        <span className="font-semibold text-black text-lg">{portfolioMetrics.riskLevel}</span>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span tabIndex={0} aria-label="Risk Level Info">
@@ -253,7 +229,7 @@ export default function InvestimClient() {
                   <CardTitle className="text-base font-semibold text-gray-900">Asset Allocation</CardTitle>
                 </div>
                 <CardContent className="pt-1">
-                  <AssetAllocationChart data={allocationData} />
+                  <AssetAllocationChart data={defaultAllocationData} />
                 </CardContent>
               </Card>
             </TabsContent>

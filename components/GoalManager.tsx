@@ -13,18 +13,17 @@ import { AddGoalForm } from "@/components/AddGoalForm"
 import { GoalFormValues } from "@/components/goalSchema"
 import { GoalCard } from "@/components/ui/GoalCard"
 import { Card, CardContent } from "@/components/ui/card"
-import { Home, Target, Car, Book, Gift, Circle } from "lucide-react"
 import { COLORS } from "@/constants/colors"
+import { getGoalIcon, IconName } from "@/constants/icons"
 
-// Map icon name to Lucide icon JSX
-const ICON_MAP: Record<string, JSX.Element> = {
-  home: <Home className="h-5 w-5" color={COLORS.PRIMARY} />,
-  target: <Target className="h-5 w-5" color={COLORS.PRIMARY} />,
-  car: <Car className="h-5 w-5" color={COLORS.PRIMARY} />,
-  book: <Book className="h-5 w-5" color={COLORS.PRIMARY} />,
-  gift: <Gift className="h-5 w-5" color={COLORS.PRIMARY} />,
-  circle: <Circle className="h-5 w-5" color={COLORS.PRIMARY} />,
-}
+// Helper function to get icon with consistent styling
+const getIcon = (iconName: string): JSX.Element => {
+  return (
+    <div className="h-5 w-5">
+      {getGoalIcon(iconName as IconName, 20)}
+    </div>
+  );
+};
 
 // Define the extended goal type that includes progress information
 export interface GoalWithProgress {
@@ -85,7 +84,7 @@ export default function GoalManager({ initialGoals = [] }: GoalManagerProps) {
               <GoalCard
                 key={idx}
                 title={goal.name}
-                icon={ICON_MAP[goal.icon] || ICON_MAP.circle}
+                icon={getIcon(goal.icon)}
                 targetDescription={`Target: ${typeof goal.amount === 'number' ? `$${goal.amount}` : goal.amount} by ${goal.targetDate}`}
                 progressPercent={goal.progressPercent || 0}
                 currentAmount={goal.currentAmount ? `$${goal.currentAmount}` : "$0"}

@@ -7,21 +7,18 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { goalSchema, GoalFormValues } from "./goalSchema"
-import { Home, Target, Car, Book, Gift, Circle } from "lucide-react"
 import { COLORS } from "@/constants/colors"
+import { GOAL_ICONS, getGoalIcon } from "@/constants/icons"
 
 function formatK(amount: number) {
   return amount >= 1000 ? `${amount / 1000}K` : amount.toString()
 }
 
-const ICONS = [
-  { name: "home", icon: <Home size={24} color={COLORS.PRIMARY} /> },
-  { name: "target", icon: <Target size={24} color={COLORS.PRIMARY} /> },
-  { name: "car", icon: <Car size={24} color={COLORS.PRIMARY} /> },
-  { name: "book", icon: <Book size={24} color={COLORS.PRIMARY} /> },
-  { name: "gift", icon: <Gift size={24} color={COLORS.PRIMARY} /> },
-  { name: "circle", icon: <Circle size={24} color={COLORS.PRIMARY} /> }, // generic
-]
+// Use centralized icon configuration
+const ICONS = GOAL_ICONS.map(icon => ({
+  name: icon.name,
+  icon: getGoalIcon(icon.name, 24)
+}));
 
 interface AddGoalFormProps {
   onSubmit: (data: GoalFormValues) => void
