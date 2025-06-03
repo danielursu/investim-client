@@ -8,18 +8,19 @@ import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { goalSchema, GoalFormValues } from "./goalSchema"
 import { Home, Target, Car, Book, Gift, Circle } from "lucide-react"
+import { COLORS } from "@/constants/colors"
 
 function formatK(amount: number) {
   return amount >= 1000 ? `${amount / 1000}K` : amount.toString()
 }
 
 const ICONS = [
-  { name: "home", icon: <Home size={24} color="#079669" /> },
-  { name: "target", icon: <Target size={24} color="#079669" /> },
-  { name: "car", icon: <Car size={24} color="#079669" /> },
-  { name: "book", icon: <Book size={24} color="#079669" /> },
-  { name: "gift", icon: <Gift size={24} color="#079669" /> },
-  { name: "circle", icon: <Circle size={24} color="#079669" /> }, // generic
+  { name: "home", icon: <Home size={24} color={COLORS.PRIMARY} /> },
+  { name: "target", icon: <Target size={24} color={COLORS.PRIMARY} /> },
+  { name: "car", icon: <Car size={24} color={COLORS.PRIMARY} /> },
+  { name: "book", icon: <Book size={24} color={COLORS.PRIMARY} /> },
+  { name: "gift", icon: <Gift size={24} color={COLORS.PRIMARY} /> },
+  { name: "circle", icon: <Circle size={24} color={COLORS.PRIMARY} /> }, // generic
 ]
 
 interface AddGoalFormProps {

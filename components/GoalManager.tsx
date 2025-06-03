@@ -9,19 +9,21 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import { AddGoalForm, GoalFormValues } from "@/components/AddGoalForm"
+import { AddGoalForm } from "@/components/AddGoalForm"
+import { GoalFormValues } from "@/components/goalSchema"
 import { GoalCard } from "@/components/ui/GoalCard"
 import { Card, CardContent } from "@/components/ui/card"
 import { Home, Target, Car, Book, Gift, Circle } from "lucide-react"
+import { COLORS } from "@/constants/colors"
 
 // Map icon name to Lucide icon JSX
 const ICON_MAP: Record<string, JSX.Element> = {
-  home: <Home className="h-5 w-5" color="#079669" />,
-  target: <Target className="h-5 w-5" color="#079669" />,
-  car: <Car className="h-5 w-5" color="#079669" />,
-  book: <Book className="h-5 w-5" color="#079669" />,
-  gift: <Gift className="h-5 w-5" color="#079669" />,
-  circle: <Circle className="h-5 w-5" color="#079669" />,
+  home: <Home className="h-5 w-5" color={COLORS.PRIMARY} />,
+  target: <Target className="h-5 w-5" color={COLORS.PRIMARY} />,
+  car: <Car className="h-5 w-5" color={COLORS.PRIMARY} />,
+  book: <Book className="h-5 w-5" color={COLORS.PRIMARY} />,
+  gift: <Gift className="h-5 w-5" color={COLORS.PRIMARY} />,
+  circle: <Circle className="h-5 w-5" color={COLORS.PRIMARY} />,
 }
 
 // Define the extended goal type that includes progress information
