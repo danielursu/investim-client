@@ -10,57 +10,20 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import { COLORS } from '@/constants/colors';
+import { 
+  ChatbotProps, 
+  QuizOption, 
+  QuizQuestionData, 
+  AllocationItem, 
+  AssetAllocationData, 
+  ChatMessage, 
+  RagSource, 
+  RagResponse,
+  ChatbotApiError
+} from '@/types';
 
-interface ChatbotProps {
-  open: boolean
-  onClose: () => void
-  userAvatarUrl?: string // optional user profile pic
-}
-
-interface RagSource {
-  id?: string | number
-  content: string
-  metadata?: Record<string, unknown>
-}
-
-interface RagResponse {
-  answer: string
-  sources: RagSource[]
-  [key: string]: unknown
-}
-
-interface QuizOption {
-  value: string;
-  label: string;
-}
-
-interface QuizQuestionData {
-  id: number;
-  text: string;
-  options: QuizOption[];
-}
-
-interface AllocationItem {
-  name: string; 
-  percentage: number;
-  color?: string; 
-}
-
-interface AssetAllocationData {
-  level: 'Moderate' | 'Conservative' | 'Aggressive';
-  etfs: AllocationItem[];
-}
-
-interface ChatMessage {
-  id: string;
-  type: 'text' | 'quiz';
-  role: "user" | "bot";
-  content: string;
-  questionData?: QuizQuestionData;
-  allocationData?: AssetAllocationData;
-  sources?: RagSource[];
-  timestamp: Date;
-}
+// All interfaces now imported from shared types
 
 const riskQuizQuestions: QuizQuestionData[] = [
   {
@@ -95,10 +58,10 @@ const riskQuizQuestions: QuizQuestionData[] = [
 const moderateAllocation: AssetAllocationData = {
   level: 'Moderate',
   etfs: [
-    { name: 'US Total Stock Market (VTI)', percentage: 40, color: '#34D399' }, // Green
-    { name: 'Intl Developed Stocks (VEA)', percentage: 20, color: '#60A5FA' }, // Blue
-    { name: 'US Total Bond Market (BND)', percentage: 30, color: '#FBBF24' }, // Amber
-    { name: 'Real Estate (VNQ)', percentage: 10, color: '#F87171' }, // Red
+    { name: 'US Total Stock Market (VTI)', percentage: 40, color: COLORS.CHART.STOCKS },
+    { name: 'Intl Developed Stocks (VEA)', percentage: 20, color: COLORS.CHART.BONDS }, 
+    { name: 'US Total Bond Market (BND)', percentage: 30, color: COLORS.CHART.REAL_ESTATE },
+    { name: 'Real Estate (VNQ)', percentage: 10, color: COLORS.CHART.ALTERNATIVES },
   ],
 };
 
@@ -163,9 +126,19 @@ export const Chatbot: FC<ChatbotProps> = ({ open, onClose, userAvatarUrl }) => {
             // Ignore text error, keep the default message
         }
       }
-      throw new Error(errorBody); // Throw the refined error message
+      throw new ChatbotApiError(errorBody, res.status, res.statusText);
     }
-    return res.json() as Promise<RagResponse>; // Added type assertion
+    
+    try {
+      const data = await res.json();
+      // Validate the response structure
+      if (!data || typeof data.answer !== 'string') {
+        throw new ChatbotApiError('Invalid response format from assistant');
+      }
+      return data as RagResponse;
+    } catch (parseError) {
+      throw new ChatbotApiError('Failed to parse assistant response');
+    }
   }
 
   const handleAsk = async (e: React.FormEvent) => {
@@ -199,11 +172,18 @@ export const Chatbot: FC<ChatbotProps> = ({ open, onClose, userAvatarUrl }) => {
       }
       setMessages(prevMessages => [...prevMessages, botMessage])
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error asking RAG:", err)
-      // Set a user-friendly error message instead of the raw error
-      setError("Sorry, there was an issue connecting to the assistant. Please check your connection or try again later.")
-      // Ensure we don't add a broken bot message by not adding anything here
+      
+      let errorMessage = "Sorry, there was an issue connecting to the assistant. Please check your connection or try again later.";
+      
+      if (err instanceof ChatbotApiError) {
+        errorMessage = `Assistant error: ${err.message}`;
+      } else if (err instanceof Error) {
+        errorMessage = `Connection error: ${err.message}`;
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -212,7 +192,8 @@ export const Chatbot: FC<ChatbotProps> = ({ open, onClose, userAvatarUrl }) => {
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleAsk(e as any); 
+      const formEvent = { preventDefault: () => {} } as React.FormEvent;
+      handleAsk(formEvent); 
     }
   }
 

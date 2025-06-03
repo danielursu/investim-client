@@ -2,17 +2,9 @@ import React from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { QuizOption, QuizQuestionData } from '@/types';
 
-interface QuizOption {
-  value: string;
-  label: string;
-}
-
-interface QuizQuestionData {
-  id: number;
-  text: string;
-  options: QuizOption[];
-}
+// Types now imported from shared types
 
 interface RiskQuizQuestionProps {
   question: QuizQuestionData;
