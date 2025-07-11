@@ -30,6 +30,13 @@ const LazyMarkdownRenderer = ({ content }: { content: string }) => {
           import('remark-math'), 
           import('rehype-katex')
         ]);
+        
+        console.log('Math plugins loaded successfully:', {
+          gfm: !!gfmModule.default,
+          math: !!mathModule.default,
+          katex: !!katexModule.default
+        });
+        
         setPlugins({ 
           gfm: gfmModule.default, 
           math: mathModule.default, 
@@ -44,36 +51,46 @@ const LazyMarkdownRenderer = ({ content }: { content: string }) => {
     loadPlugins();
   }, []);
 
-  return (
-    <ReactMarkdown
-      remarkPlugins={plugins.gfm && plugins.math ? [plugins.gfm, plugins.math] : []}
-      rehypePlugins={plugins.katex ? [plugins.katex] : []}
-      components={{
-        a: ({ node, ...props }) => (
-          <a 
-            {...props} 
-            className="text-emerald-600 underline" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-          />
-        ),
-        code: ({ node, ...props }) => (
-          <code 
-            {...props} 
-            className="bg-gray-100 dark:bg-gray-800 rounded px-1 text-[13px]" 
-          />
-        ),
-        ul: ({ node, ...props }) => (
-          <ul {...props} className="list-disc ml-5" />
-        ),
-        ol: ({ node, ...props }) => (
-          <ol {...props} className="list-decimal ml-5" />
-        ),
-      }}
-    >
-      {content}
-    </ReactMarkdown>
-  );
+  // Show loading state while plugins are loading
+  if (!plugins.gfm || !plugins.math || !plugins.katex) {
+    return <TextFallback content={content} />;
+  }
+
+  try {
+    return (
+      <ReactMarkdown
+        remarkPlugins={[plugins.gfm, plugins.math]}
+        rehypePlugins={[plugins.katex]}
+        components={{
+          a: ({ node, ...props }) => (
+            <a 
+              {...props} 
+              className="text-emerald-600 underline" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+            />
+          ),
+          code: ({ node, ...props }) => (
+            <code 
+              {...props} 
+              className="bg-gray-100 dark:bg-gray-800 rounded px-1 text-[13px]" 
+            />
+          ),
+          ul: ({ node, ...props }) => (
+            <ul {...props} className="list-disc ml-5" />
+          ),
+          ol: ({ node, ...props }) => (
+            <ol {...props} className="list-decimal ml-5" />
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    );
+  } catch (error) {
+    console.error('Error rendering markdown with math:', error);
+    return <TextFallback content={content} />;
+  }
 };
 
 export interface MessageListProps {

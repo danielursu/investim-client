@@ -65,12 +65,32 @@ export const sanitizeHtml = (html: string): string => {
 };
 
 /**
+ * Detects and wraps mathematical expressions for KaTeX rendering
+ */
+export const wrapMathExpressions = (content: string): string => {
+  if (!content) return '';
+  
+  return content
+    // Wrap standalone mathematical equations (e.g., "FV = 10,000", "PMT = 250")
+    .replace(/\b([A-Z]{1,4})\s*=\s*([\d,\.\-]+(?:%|\$)?)/g, '$$$1 = $2$$')
+    // Wrap mathematical formulas with variables (e.g., "FV = PMT × [(1 + r)^n - 1] / r")
+    .replace(/\b([A-Z]{1,4})\s*=\s*([^\n\.\!?\;]{10,80}[\)\]\d%\$])/g, '$$$1 = $2$$')
+    // Wrap percentage expressions (e.g., "r = 3%", "rate = 0.03")
+    .replace(/\b([a-zA-Z]+)\s*=\s*(\d+(?:\.\d+)?%?)/g, '$$$1 = $2$$')
+    // Wrap expressions in brackets that look like formulas
+    .replace(/\[\s*([^[\]]+[+\-\*/\^]\s*[^[\]]*)\s*\]/g, '$$[$1]$$')
+    // Clean up any double-wrapped expressions
+    .replace(/\$\$\$\$/g, '$$')
+    .replace(/\$\$\s*\$\$/g, '$$');
+};
+
+/**
  * Cleans and formats RAG response content for better readability
  */
 export const cleanRAGContent = (content: string): string => {
   if (!content) return '';
   
-  return content
+  let cleaned = content
     // Remove redundant reference markers like [1], [2], [3] at the end of sentences
     .replace(/\s+\[\d+\](?=[\.\,\;\:]?\s|$)/g, '')
     // Clean up multiple consecutive spaces
@@ -86,6 +106,9 @@ export const cleanRAGContent = (content: string): string => {
     // Remove any remaining citation brackets in the middle of text
     .replace(/\[\d+\]/g, '')
     .trim();
+  
+  // Apply math expression wrapping
+  return wrapMathExpressions(cleaned);
 };
 
 /**
