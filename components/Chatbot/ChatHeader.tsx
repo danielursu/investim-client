@@ -13,7 +13,7 @@ export interface ChatHeaderProps {
  */
 const ChatHeaderComponent: React.FC<ChatHeaderProps> = ({ onClose }) => {
   return (
-    <div className="p-3 border-b flex justify-between items-center bg-emerald-600 text-white rounded-t-lg">
+    <div className="p-4 border-b border-emerald-500/20 flex justify-between items-center bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-t-2xl">
       <div className="flex items-center">
         <BotMessageSquare className="h-6 w-6 mr-2" />
         <h3 className="text-base font-semibold">Investment Assistant</h3>

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { useRiskQuiz } from '@/hooks/useRiskQuiz';
 import { useChatAPI } from '@/hooks/useChatAPI';
 import { ChatHeader } from './ChatHeader';
@@ -14,6 +14,7 @@ import {
   useChatCurrentQuizQuestionIndex,
   useChatAddMessage,
   useChatAddMessages,
+  useChatClearMessages,
   useChatSetLoading,
   useChatSetError,
   useChatClearError,
@@ -45,6 +46,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
   // Get actions from stores
   const addMessage = useChatAddMessage();
   const addMessages = useChatAddMessages();
+  const clearMessages = useChatClearMessages();
   const setLoading = useChatSetLoading();
   const setError = useChatSetError();
   const clearError = useChatClearError();
@@ -71,15 +73,16 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]); // setIsOpen is stable from Zustand
 
-  // Initialize chat when opened - use a ref to track if initialized
-  const hasInitialized = React.useRef(false);
+  // Use a ref to track initialization to prevent double mounting issues
+  const initializationRef = useRef(false);
   
+  // Initialize chat when opened
   useEffect(() => {
-    if (open && !hasInitialized.current) {
-      hasInitialized.current = true;
+    if (open && messages.length === 0 && !initializationRef.current) {
+      initializationRef.current = true;
       
       const initialMessage: ChatMessage = {
-        id: `bot-init-${Date.now()}`,
+        id: `bot-init-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type: 'text',
         role: 'bot',
         content: 'Hello! To start, let\'s quickly assess your risk tolerance.',
@@ -97,12 +100,12 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
       }, 500);
     }
     
-    // Reset initialization flag when closed
+    // Reset initialization flag when chat is closed
     if (!open) {
-      hasInitialized.current = false;
+      initializationRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]); // Store actions are stable, only depend on open state
+  }, [open, messages.length]); // Depend on both open state and message length
 
   // Handle quiz answer selection
   const onQuizAnswerSelect = useCallback((questionId: number, answerValue: string) => {
@@ -130,7 +133,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     if (!messageText.trim() || loading || isQuizActive) return;
 
     const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type: 'text',
       role: 'user',
       content: messageText,
@@ -145,7 +148,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
       const response = await askRag(messageText);
 
       const botMessage: ChatMessage = {
-        id: `bot-${Date.now()}`,
+        id: `bot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type: 'text',
         role: 'bot',
         content: response.answer || 'Sorry, I received an empty response.',
@@ -177,17 +180,18 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     return 'Type your message...';
   }, [isQuizActive]);
 
-  // Handle close with store update
+  // Handle close with store update and clear messages for fresh start
   const handleClose = useCallback(() => {
     setIsOpen(false);
+    clearMessages(); // Clear messages for fresh start next time
     onClose();
-  }, [onClose, setIsOpen]);
+  }, [onClose, setIsOpen, clearMessages]);
 
   // Don't render if not open
   if (!open) return null;
 
   return (
-    <div className="fixed bottom-16 right-4 w-[calc(100%-2rem)] max-w-md bg-white rounded-lg shadow-xl border border-gray-200 max-h-[70vh] flex flex-col z-50 font-inter">
+    <div className="fixed bottom-16 right-4 w-[calc(100%-2rem)] max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200/50 max-h-[70vh] flex flex-col z-50 font-inter backdrop-blur-sm">
       <ChatHeader onClose={handleClose} />
       
       <MessageList

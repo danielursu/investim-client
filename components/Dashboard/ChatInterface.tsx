@@ -43,7 +43,7 @@ export const ChatInterface = () => {
       {!chatOpen && (
         <Button
           onClick={() => setChatOpen(true)}
-          className="fixed bottom-20 right-4 h-14 w-14 rounded-full bg-emerald-600 hover:bg-emerald-700 shadow-lg"
+          className="fixed bottom-20 right-4 h-14 w-14 rounded-full bg-emerald-600 hover:bg-emerald-700 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
         >
           <BotMessageSquare className="h-6 w-6" />
         </Button>

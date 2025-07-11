@@ -161,9 +161,21 @@ const MessageListComponent: React.FC<MessageListProps> = ({
     );
   };
 
+  // Filter out any potential duplicate messages by ID
+  const uniqueMessages = React.useMemo(() => {
+    const seenIds = new Set();
+    return messages.filter(msg => {
+      if (seenIds.has(msg.id)) {
+        return false;
+      }
+      seenIds.add(msg.id);
+      return true;
+    });
+  }, [messages]);
+
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-      {messages.map((msg) => (
+    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-gray-50/50 to-white">
+      {uniqueMessages.map((msg) => (
         <div 
           key={msg.id} 
           className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}

@@ -71,12 +71,12 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
   );
 
   return (
-    <form className="p-3 border-t bg-white" onSubmit={handleSubmit}>
-      <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+    <form className="p-4 border-t border-gray-200/50 bg-white rounded-b-2xl" onSubmit={handleSubmit}>
+      <div className="flex items-center bg-gray-100 rounded-2xl px-4 py-3 transition-all duration-200 focus-within:bg-gray-50 focus-within:ring-2 focus-within:ring-emerald-500/20">
         <input
           type="text"
           placeholder={placeholder}
-          className="flex-1 bg-transparent outline-none text-sm"
+          className="flex-1 bg-transparent outline-none text-sm placeholder-gray-500"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -86,7 +86,7 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
         />
         <Button
           size="icon"
-          className="h-7 w-7 rounded-full bg-emerald-600 hover:bg-emerald-700 ml-2"
+          className="h-8 w-8 rounded-full bg-emerald-600 hover:bg-emerald-700 ml-2 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           type="submit"
           disabled={loading || !inputValue.trim() || disabled}
           aria-label="Send message"
