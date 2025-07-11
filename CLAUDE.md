@@ -9,6 +9,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint for code quality checks
 
+## Testing
+- **No Testing Framework**: Currently no test setup exists in this project
+- **No Test Commands**: Project lacks Jest/Vitest configuration and test scripts
+
 ## Architecture Overview
 
 This is a mobile-first investment assistant app built with Next.js 15, TypeScript, and Tailwind CSS. The application follows a modern React architecture with the following key patterns:
@@ -39,8 +43,27 @@ This is a mobile-first investment assistant app built with Next.js 15, TypeScrip
 - **Tailwind CSS**: Utility-first CSS framework with custom design system
 - **Theme System**: Uses next-themes for theme management
 - **Component Variants**: class-variance-authority for component styling patterns
+- **Color System**: Centralized colors defined in `/constants/colors.ts`
+
+## Key Files and Patterns
+
+### Environment Configuration
+- **Environment Validation**: `/lib/env.ts` handles validation of required environment variables
+- **Required Variables**: `FASTAPI_RAG_URL` (defaults to `http://127.0.0.1:8000/query`)
+- **Validation**: Environment variables are validated at request time in API routes
+
+### Data Management
+- **Static Data**: Mock data and configurations stored in `/data/` directory
+- **Type Definitions**: Centralized in `/types/index.ts` with comprehensive TypeScript interfaces
+- **Constants**: Colors, icons, and other constants in `/constants/` directory
+
+### Component Structure
+- **UI Components**: shadcn/ui components in `/components/ui/` (auto-generated, avoid manual edits)
+- **Feature Components**: Application-specific components in `/components/`
+- **Dashboard Components**: Organized in `/components/Dashboard/` with barrel exports via `index.ts`
 
 ## Deployment
 - **Netlify**: Configured for deployment with `netlify.toml`
 - **Node Version**: Uses Node.js 20 in production
 - **Static Generation**: Next.js static site generation for optimal performance
+- **Build Configuration**: Uses Next.js 15 with experimental features enabled for performance

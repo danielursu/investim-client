@@ -1,15 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense, lazy } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { TrendingUp, Shield, Info } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
-import { PerformanceChart } from "@/components/ui/PerformanceChart"
-import { AssetAllocationChart } from "@/components/ui/AssetAllocationChart"
 import { Period } from "@/types"
 import { defaultAllocationData, portfolioMetrics } from "@/data/portfolio-allocations"
 import { PeriodSelector } from "./PeriodSelector"
+
+// Lazy load chart components
+const PerformanceChart = lazy(() => import("@/components/ui/PerformanceChart").then(module => ({ default: module.PerformanceChart })));
+const AssetAllocationChart = lazy(() => import("@/components/ui/AssetAllocationChart").then(module => ({ default: module.AssetAllocationChart })));
+
+// Loading components for charts
+const ChartLoading = () => (
+  <div className="w-full h-48 rounded-md flex items-center justify-center bg-gray-50 animate-pulse">
+    <div className="text-sm text-gray-500">Loading chart...</div>
+  </div>
+);
+
+const AllocationLoading = () => (
+  <div className="w-full h-[300px] rounded-md flex items-center justify-center bg-gray-50 animate-pulse">
+    <div className="text-sm text-gray-500">Loading allocation chart...</div>
+  </div>
+);
 
 export const PerformanceTabs = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("12M");
@@ -35,7 +50,9 @@ export const PerformanceTabs = () => {
                   selectedPeriod={selectedPeriod} 
                   onPeriodChange={setSelectedPeriod} 
                 />
-                <PerformanceChart period={selectedPeriod} />
+                <Suspense fallback={<ChartLoading />}>
+                  <PerformanceChart period={selectedPeriod} />
+                </Suspense>
                 <div className="flex justify-evenly items-center mt-4">
                   <div className="flex flex-row items-center gap-2 w-32 justify-center">
                     <TrendingUp className="h-5 w-5 text-emerald-700" />
@@ -61,7 +78,7 @@ export const PerformanceTabs = () => {
                         </span>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-xs">
-                        An assessment of your portfolio's volatility and potential for loss.
+                        An assessment of your portfolio&apos;s volatility and potential for loss.
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -77,7 +94,9 @@ export const PerformanceTabs = () => {
               <CardTitle className="text-base font-semibold text-gray-900">Asset Allocation</CardTitle>
             </div>
             <CardContent className="pt-1">
-              <AssetAllocationChart data={defaultAllocationData} />
+              <Suspense fallback={<AllocationLoading />}>
+                <AssetAllocationChart data={defaultAllocationData} />
+              </Suspense>
             </CardContent>
           </Card>
         </TabsContent>

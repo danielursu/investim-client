@@ -59,6 +59,33 @@ export interface ChatbotProps {
   userAvatarUrl?: string;
 }
 
+// Refactored Chatbot Component Props
+export interface ChatbotContainerProps {
+  open: boolean;
+  onClose: () => void;
+  userAvatarUrl?: string;
+}
+
+export interface ChatHeaderProps {
+  onClose: () => void;
+}
+
+export interface MessageListProps {
+  messages: ChatMessage[];
+  loading: boolean;
+  error: string;
+  userAvatarUrl?: string;
+  chatEndRef: React.RefObject<HTMLDivElement>;
+  onAnswerSelect: (questionId: number, answerValue: string) => void;
+}
+
+export interface ChatInputProps {
+  onSendMessage: (message: string) => void;
+  disabled: boolean;
+  loading: boolean;
+  placeholder?: string;
+}
+
 export interface AssetAllocationChartProps {
   data: AllocationItem[];
 }

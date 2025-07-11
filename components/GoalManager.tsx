@@ -13,8 +13,8 @@ import { AddGoalForm } from "@/components/AddGoalForm"
 import { GoalFormValues } from "@/components/goalSchema"
 import { GoalCard } from "@/components/ui/GoalCard"
 import { Card, CardContent } from "@/components/ui/card"
-import { COLORS } from "@/constants/colors"
 import { getGoalIcon, IconName } from "@/constants/icons"
+import { useGoals, useAddGoal, useIsGoalsLoading } from "@/stores/goalsStore"
 
 // Helper function to get icon with consistent styling
 const getIcon = (iconName: string): JSX.Element => {
@@ -25,47 +25,45 @@ const getIcon = (iconName: string): JSX.Element => {
   );
 };
 
-// Define the extended goal type that includes progress information
-export interface GoalWithProgress {
-  name: string;
-  icon: string;
-  amount: string | number;
-  targetDate: string;
-  description?: string;
-  progressPercent?: number;
-  currentAmount?: string;
-}
+// Re-export the type for backward compatibility
+export type { GoalWithProgress } from "@/stores/goalsStore";
 
 interface GoalManagerProps {
-  initialGoals?: GoalWithProgress[];
+  // Remove initialGoals prop as we're now using the store
 }
 
-export function GoalManager({ initialGoals = [] }: GoalManagerProps) {
+export function GoalManager({}: GoalManagerProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [goals, setGoals] = useState<GoalWithProgress[]>(initialGoals)
+  
+  // Get goals and actions from the store
+  const goals = useGoals();
+  const addGoal = useAddGoal();
+  const isLoading = useIsGoalsLoading();
 
   const handleAddGoal = (goal: GoalFormValues) => {
-    // Convert GoalFormValues to GoalWithProgress
-    const newGoal: GoalWithProgress = {
-      ...goal,
-      progressPercent: 0,
-      currentAmount: "0"
-    }
-    setGoals(prev => [...prev, newGoal])
-    setDialogOpen(false) // Close dialog on submit
+    // Use the store action to add the goal
+    addGoal(goal);
+    setDialogOpen(false); // Close dialog on submit
   }
 
   // Placeholder function for AI setup CTA
   const handleAiSetup = () => {
     console.log("AI setup requested!");
-    // TODO: Implement AI goal setup logic
+    // TODO: Implement AI goal setup logic with store integration
   }
 
   return (
     <div className="space-y-4">
       {/* Display the list of goals or empty state */}
       <div className="mt-4">
-        {goals.length === 0 ? (
+        {isLoading ? (
+          <Card className="border-dashed border-gray-300 text-center py-8">
+            <CardContent className="flex flex-col items-center justify-center space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+              <p className="text-gray-500">Loading goals...</p>
+            </CardContent>
+          </Card>
+        ) : goals.length === 0 ? (
           <Card className="border-dashed border-gray-300 text-center py-8">
             <CardContent className="flex flex-col items-center justify-center space-y-4">
               <p className="text-gray-500">No goals set yet.</p>
@@ -82,13 +80,13 @@ export function GoalManager({ initialGoals = [] }: GoalManagerProps) {
           <>
             {goals.map((goal, idx) => (
               <GoalCard
-                key={idx}
+                key={`${goal.name}-${idx}`}
                 title={goal.name}
                 icon={getIcon(goal.icon)}
-                targetDescription={`Target: ${typeof goal.amount === 'number' ? `$${goal.amount}` : goal.amount} by ${goal.targetDate}`}
+                targetDescription={`Target: ${typeof goal.amount === 'number' ? `$${goal.amount.toLocaleString()}` : goal.amount} by ${goal.targetDate}`}
                 progressPercent={goal.progressPercent || 0}
                 currentAmount={goal.currentAmount ? `$${goal.currentAmount}` : "$0"}
-                targetAmount={typeof goal.amount === 'number' ? `$${goal.amount}` : goal.amount}
+                targetAmount={typeof goal.amount === 'number' ? `$${goal.amount.toLocaleString()}` : goal.amount}
               />
             ))}
           </>
@@ -102,6 +100,7 @@ export function GoalManager({ initialGoals = [] }: GoalManagerProps) {
             type="button"
             variant="outline"
             className="w-full border-dashed border-gray-300 text-gray-500 mt-4"
+            disabled={isLoading}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add New Goal

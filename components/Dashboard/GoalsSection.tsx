@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { ChevronRight } from "lucide-react"
 import { GoalManager } from '@/components/GoalManager'
-import { defaultGoals } from "@/data/portfolio-allocations"
 
 export const GoalsSection = () => {
   return (
@@ -15,7 +14,7 @@ export const GoalsSection = () => {
         </Button>
       </div>
 
-      <GoalManager initialGoals={defaultGoals} />
+      <GoalManager />
     </div>
   )
 }
