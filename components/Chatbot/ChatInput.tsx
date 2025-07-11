@@ -76,7 +76,7 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
         <input
           type="text"
           placeholder={placeholder}
-          className="flex-1 bg-transparent outline-none text-sm placeholder-gray-500"
+          className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}

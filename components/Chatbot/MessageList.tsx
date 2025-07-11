@@ -83,6 +83,7 @@ export interface MessageListProps {
   userAvatarUrl?: string;
   chatEndRef: React.RefObject<HTMLDivElement>;
   onAnswerSelect: (questionId: number, answerValue: string) => void;
+  isWarmingUp?: boolean;
 }
 
 /**
@@ -96,6 +97,7 @@ const MessageListComponent: React.FC<MessageListProps> = ({
   userAvatarUrl,
   chatEndRef,
   onAnswerSelect,
+  isWarmingUp = false,
 }) => {
   const renderMessage = (msg: ChatMessage) => {
     if (msg.type === 'quiz' && msg.questionData) {
@@ -119,27 +121,69 @@ const MessageListComponent: React.FC<MessageListProps> = ({
           <LazyMarkdownRenderer content={sanitizeMarkdown(msg.content)} />
         </Suspense>
 
-        {/* Sources section */}
+        {/* Enhanced Sources section */}
         {msg.sources && msg.sources.length > 0 && (
-          <Collapsible className="mt-2">
-            <CollapsibleTrigger className="text-xs text-emerald-600 underline">
-              Sources
+          <Collapsible className="mt-3">
+            <CollapsibleTrigger className="flex items-center gap-1 text-xs text-emerald-700 hover:text-emerald-800 font-medium">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Sources ({msg.sources.length})
             </CollapsibleTrigger>
-            <CollapsibleContent className="mt-1">
-              <ul className="text-xs space-y-1">
-                {msg.sources.map((src, i) => (
-                  <li key={src.id || i} className="border-b border-emerald-100 pb-1 last:border-b-0">
-                    <pre className="whitespace-pre-wrap break-words font-mono bg-gray-50 p-1 rounded text-xs mb-1">
-                      {sanitizeSourceContent(src.content)}
-                    </pre>
-                    {src.metadata && (
-                      <small className="block text-gray-500">
-                        {sanitizeSourceContent(JSON.stringify(src.metadata))}
-                      </small>
-                    )}
-                  </li>
-                ))}
-              </ul>
+            <CollapsibleContent className="mt-2">
+              <div className="space-y-2">
+                {msg.sources.map((src, i) => {
+                  // Extract clean metadata
+                  const metadata = src.metadata || {};
+                  const source = (metadata.source as string) || 'Unknown Document';
+                  const pageNum = (metadata.page_num as number) || (metadata.page as number);
+                  const documentTitle = source.includes('/') ? source.split('/').pop() : source;
+                  const cleanTitle = documentTitle?.replace(/\.(pdf|md|txt)$/i, '') || 'Document';
+                  
+                  // Create content excerpt (first 200 chars with proper word break)
+                  let excerpt = src.content || '';
+                  if (excerpt.length > 200) {
+                    excerpt = excerpt.substring(0, 200);
+                    const lastSpace = excerpt.lastIndexOf(' ');
+                    if (lastSpace > 150) {
+                      excerpt = excerpt.substring(0, lastSpace);
+                    }
+                    excerpt += '...';
+                  }
+                  
+                  return (
+                    <div key={src.id || i} className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-100 rounded-lg p-3 text-sm">
+                      {/* Source header */}
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 text-xs mb-1">
+                            📄 {cleanTitle}
+                          </h4>
+                          <div className="flex items-center gap-2 text-xs text-gray-600">
+                            {pageNum && (
+                              <span className="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                                Page {pageNum}
+                              </span>
+                            )}
+                            {typeof metadata.similarity === 'number' && (
+                              <span className="text-gray-500 text-[10px]">
+                                {Math.round(metadata.similarity * 100)}% match
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Content excerpt */}
+                      <div className="border-l-2 border-emerald-200 pl-2">
+                        <div className="text-gray-700 text-xs leading-relaxed italic">
+                          &ldquo;{excerpt}&rdquo;
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </CollapsibleContent>
           </Collapsible>
         )}
@@ -207,8 +251,25 @@ const MessageListComponent: React.FC<MessageListProps> = ({
         </div>
       ))}
 
+      {/* API Warming Up indicator */}
+      {isWarmingUp && !loading && (
+        <div className="flex w-full justify-start">
+          <Avatar className="h-6 w-6 mr-2 bg-white/50 mt-auto">
+            <AvatarFallback>
+              <BotMessageSquare className="h-4 w-4 text-emerald-600" />
+            </AvatarFallback>
+          </Avatar>
+          <div className="rounded-lg px-3 py-2 max-w-[80%] shadow-sm text-sm bg-yellow-50 text-yellow-800 border border-yellow-200">
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-3 w-3 border-b-1 border-yellow-600 mr-2"></div>
+              🔄 Waking up the AI assistant... This may take up to 60 seconds.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Loading indicator */}
-      {loading && (
+      {loading && !isWarmingUp && (
         <div className="flex w-full justify-start">
           <Avatar className="h-6 w-6 mr-2 bg-white/50 mt-auto">
             <AvatarFallback>

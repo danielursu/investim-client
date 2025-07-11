@@ -46,6 +46,8 @@ export const useRiskQuiz = (): UseRiskQuizReturn => {
 
   const startQuiz = useCallback((): ChatMessage[] => {
     if (riskQuizQuestions.length > 0 && !isQuizActive) {
+      // Clear any previous quiz data when starting fresh
+      resetQuizStore();
       setQuizActive(true);
       setCurrentQuizQuestion(0);
       const firstQuestion = riskQuizQuestions[0];
@@ -62,7 +64,7 @@ export const useRiskQuiz = (): UseRiskQuizReturn => {
       return [quizMessage];
     }
     return [];
-  }, [isQuizActive, setQuizActive, setCurrentQuizQuestion]);
+  }, [isQuizActive, setQuizActive, setCurrentQuizQuestion, resetQuizStore]);
 
   const handleAnswerSelect = useCallback((questionId: number, answerValue: string) => {
     // Prevent duplicate answers

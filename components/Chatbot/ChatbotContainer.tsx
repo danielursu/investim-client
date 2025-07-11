@@ -11,7 +11,6 @@ import {
   useChatIsLoading,
   useChatError,
   useChatIsQuizActive,
-  useChatCurrentQuizQuestionIndex,
   useChatAddMessage,
   useChatAddMessages,
   useChatClearMessages,
@@ -41,7 +40,6 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
   const loading = useChatIsLoading();
   const error = useChatError();
   const isQuizActive = useChatIsQuizActive();
-  const currentQuizQuestionIndex = useChatCurrentQuizQuestionIndex();
   
   // Get actions from stores
   const addMessage = useChatAddMessage();
@@ -57,7 +55,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     handleAnswerSelect,
   } = useRiskQuiz();
 
-  const { askRag } = useChatAPI();
+  const { askRag, isWarmingUp } = useChatAPI();
   
   // Create a ref for auto-scrolling
   const chatEndRef = React.useRef<HTMLDivElement | null>(null);
@@ -82,7 +80,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
       initializationRef.current = true;
       
       const initialMessage: ChatMessage = {
-        id: `bot-init-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `bot-init-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         type: 'text',
         role: 'bot',
         content: 'Hello! To start, let\'s quickly assess your risk tolerance.',
@@ -109,11 +107,14 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
 
   // Handle quiz answer selection
   const onQuizAnswerSelect = useCallback((questionId: number, answerValue: string) => {
-    if (loading) return;
+    if (loading) {
+      return;
+    }
 
     setLoading(true);
 
-    setTimeout(() => {
+    // Process quiz answer immediately for better UX
+    try {
       const result = handleAnswerSelect(questionId, answerValue);
       
       if (result.nextMessage) {
@@ -125,15 +126,18 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
       }
       
       setLoading(false);
-    }, 500); // Simulate processing time
-  }, [loading, setLoading, handleAnswerSelect, addMessage]);
+    } catch (error) {
+      setError('Failed to process quiz answer. Please try again.');
+      setLoading(false);
+    }
+  }, [loading, setLoading, handleAnswerSelect, addMessage, setError]);
 
   // Handle text message sending
   const handleSendMessage = useCallback(async (messageText: string) => {
     if (!messageText.trim() || loading || isQuizActive) return;
 
     const userMessage: ChatMessage = {
-      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       type: 'text',
       role: 'user',
       content: messageText,
@@ -148,7 +152,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
       const response = await askRag(messageText);
 
       const botMessage: ChatMessage = {
-        id: `bot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `bot-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         type: 'text',
         role: 'bot',
         content: response.answer || 'Sorry, I received an empty response.',
@@ -158,12 +162,16 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
 
       addMessage(botMessage);
     } catch (err) {
-      console.error('Error asking RAG:', err);
-      
-      let errorMessage = 'Sorry, there was an issue connecting to the assistant. Please check your connection or try again later.';
+      let errorMessage = 'Sorry, there was an issue connecting to the assistant.';
       
       if (err instanceof Error) {
-        errorMessage = `Connection error: ${err.message}`;
+        // Use the error message from useChatAPI which already handles RAGAPIError formatting
+        errorMessage = err.message;
+      }
+      
+      // Add a helpful retry suggestion if not already included
+      if (!errorMessage.includes('try again')) {
+        errorMessage += ' Please try again.';
       }
       
       setError(errorMessage);
@@ -201,6 +209,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
         userAvatarUrl={userAvatarUrl}
         chatEndRef={chatEndRef}
         onAnswerSelect={onQuizAnswerSelect}
+        isWarmingUp={isWarmingUp}
       />
       
       <ChatInput

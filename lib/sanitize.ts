@@ -3,7 +3,7 @@ import DOMPurify from 'dompurify';
 // Configure DOMPurify for safe markdown rendering
 const createDOMPurify = () => {
   if (typeof window !== 'undefined') {
-    const purify = DOMPurify(window);
+    const purify = DOMPurify(window as any);
     
     // Configure allowed tags and attributes for markdown content
     purify.setConfig({
@@ -65,14 +65,41 @@ export const sanitizeHtml = (html: string): string => {
 };
 
 /**
+ * Cleans and formats RAG response content for better readability
+ */
+export const cleanRAGContent = (content: string): string => {
+  if (!content) return '';
+  
+  return content
+    // Remove redundant reference markers like [1], [2], [3] at the end of sentences
+    .replace(/\s+\[\d+\](?=[\.\,\;\:]?\s|$)/g, '')
+    // Clean up multiple consecutive spaces
+    .replace(/\s{2,}/g, ' ')
+    // Fix spacing around punctuation
+    .replace(/\s+([\.,;:!?])/g, '$1')
+    // Ensure proper spacing after periods
+    .replace(/\.([A-Z])/g, '. $1')
+    // Remove extra newlines but preserve paragraph breaks
+    .replace(/\n{3,}/g, '\n\n')
+    // Clean up bullet points and formatting
+    .replace(/^\s*[\*\-\+]\s+/gm, '• ')
+    // Remove any remaining citation brackets in the middle of text
+    .replace(/\[\d+\]/g, '')
+    .trim();
+};
+
+/**
  * Sanitizes markdown content before rendering
  * Removes potentially dangerous markdown that could lead to XSS
  */
 export const sanitizeMarkdown = (markdown: string): string => {
   if (!markdown) return '';
   
+  // First clean the RAG content, then sanitize
+  const cleanedContent = cleanRAGContent(markdown);
+  
   // Remove dangerous markdown patterns
-  return markdown
+  return cleanedContent
     // Remove HTML script tags
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     // Remove javascript: protocols
@@ -80,7 +107,7 @@ export const sanitizeMarkdown = (markdown: string): string => {
     // Remove data: protocols (except data:image)
     .replace(/\[([^\]]*)\]\(data:(?!image)[^)]*\)/gi, '[$1](#)')
     // Remove dangerous attributes from HTML tags
-    .replace(/<([^>]+)(on\w+\s*=\s*[^>]*)/gi, '<$1')
+    .replace(/<([^>]+)(on\w+\s*=\s*[^>]*)/gi, '<$1>')
     // Limit to reasonable length to prevent DoS
     .slice(0, 50000);
 };

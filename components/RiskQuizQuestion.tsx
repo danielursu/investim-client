@@ -16,9 +16,14 @@ export function RiskQuizQuestion({ question, onAnswerSelect, isUser = false }: R
   const [selectedValue, setSelectedValue] = React.useState<string>('');
 
   const handleValueChange = (value: string) => {
+    if (selectedValue) return; // Prevent multiple selections
+    
     setSelectedValue(value);
-    // Automatically submit answer on selection for simplicity
-    onAnswerSelect(question.id, value);
+    
+    // Use setTimeout to ensure state is updated before calling onAnswerSelect
+    setTimeout(() => {
+      onAnswerSelect(question.id, value);
+    }, 50);
   };
 
   return (

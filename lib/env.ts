@@ -10,6 +10,7 @@ export class EnvValidationError extends Error {
 export function validateEnv() {
   const requiredEnvVars = {
     FASTAPI_RAG_URL: process.env.FASTAPI_RAG_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   };
 
   const missingVars: string[] = [];
@@ -21,8 +22,8 @@ export function validateEnv() {
       continue;
     }
 
-    // Validate FASTAPI_RAG_URL format
-    if (key === 'FASTAPI_RAG_URL') {
+    // Validate URL format for API endpoints
+    if (key === 'FASTAPI_RAG_URL' || key === 'NEXT_PUBLIC_API_URL') {
       try {
         new URL(value);
       } catch {
@@ -49,6 +50,7 @@ export function validateEnv() {
 // Validated environment configuration
 export const env = {
   FASTAPI_RAG_URL: process.env.FASTAPI_RAG_URL || 'http://127.0.0.1:8000/query',
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
 };
 
 // Note: Validation is performed at request time in API routes

@@ -77,6 +77,7 @@ export interface MessageListProps {
   userAvatarUrl?: string;
   chatEndRef: React.RefObject<HTMLDivElement>;
   onAnswerSelect: (questionId: number, answerValue: string) => void;
+  isWarmingUp?: boolean;
 }
 
 export interface ChatInputProps {

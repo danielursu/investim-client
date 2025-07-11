@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { RagResponse, ChatbotApiError } from '@/types';
+import { useRAGQuery } from '@/lib/api/useRAGQuery';
+import { RAGAPIError } from '@/lib/api/rag';
 
 /**
  * Hook for managing chat API calls and error handling
- * Centralizes RAG API communication logic
+ * Centralizes RAG API communication logic with enhanced cold start support
  */
 export interface UseChatAPIState {
   isLoading: boolean;
   error: string | null;
+  isWarmingUp: boolean;
 }
 
 export interface UseChatAPIActions {
@@ -18,80 +21,80 @@ export interface UseChatAPIActions {
 export interface UseChatAPIReturn extends UseChatAPIState, UseChatAPIActions {}
 
 export const useChatAPI = (): UseChatAPIReturn => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const { query: queryRAG, loading, error: ragError, isWarmingUp, reset } = useRAGQuery();
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const askRag = async (query: string): Promise<RagResponse> => {
-    setIsLoading(true);
-    setError(null);
+    setLocalError(null);
 
     try {
-      const res = await fetch('/api/rag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query }),
-      });
-
-      if (!res.ok) {
-        let errorBody = 'Failed to fetch response from the assistant.';
-        
-        try {
-          // Try to parse the error response body as JSON
-          const errorJson = await res.json();
-          // If it has an 'error' property, use that as the message
-          if (errorJson && typeof errorJson.error === 'string') {
-            errorBody = `Assistant error: ${errorJson.error}`;
-          } else {
-            // Fallback if JSON is not as expected or doesn't contain 'error'
-            errorBody = `Received status ${res.status}: ${res.statusText}`;
-          }
-        } catch (parseError) {
-          // If parsing fails, use the raw text or a generic message
-          try {
-            const rawText = await res.text();
-            errorBody = rawText || errorBody; // Use raw text if available
-          } catch (textError) {
-            // Ignore text error, keep the default message
-          }
-        }
-        
-        throw new ChatbotApiError(errorBody, res.status, res.statusText);
+      await queryRAG(query);
+      
+      // The queryRAG function handles the API call and updates the manager state
+      // We need to get the latest data from the manager
+      const { ragQueryManager } = await import('@/lib/api/rag');
+      const state = ragQueryManager.getState();
+      
+      if (state.error) {
+        throw new ChatbotApiError(state.error);
+      }
+      
+      if (!state.data) {
+        throw new ChatbotApiError('No response received from assistant');
       }
 
-      try {
-        const data = await res.json();
-        // Validate the response structure
-        if (!data || typeof data.answer !== 'string') {
-          throw new ChatbotApiError('Invalid response format from assistant');
-        }
-        return data as RagResponse;
-      } catch (parseError) {
-        throw new ChatbotApiError('Failed to parse assistant response');
-      }
+      // Convert QueryResponse to RagResponse format
+      const ragResponse: RagResponse = {
+        answer: state.data.answer,
+        sources: state.data.sources.map(source => ({
+          id: source.id,
+          content: source.content || '',
+          metadata: source.metadata || {},
+        })),
+      };
+
+      return ragResponse;
     } catch (err) {
-      let errorMessage = 'Sorry, there was an issue connecting to the assistant. Please check your connection or try again later.';
+      let errorMessage = 'Sorry, there was an issue connecting to the assistant.';
       
-      if (err instanceof ChatbotApiError) {
-        errorMessage = `Assistant error: ${err.message}`;
+      if (err instanceof RAGAPIError) {
+        // Use the user-friendly message from RAGAPIError
+        errorMessage = err.getUserFriendlyMessage();
+        
+        // Add specific suggestions based on error type
+        if (err.isNetworkError) {
+          errorMessage += ' Please check your internet connection and try again.';
+        } else if (err.isTimeoutError) {
+          errorMessage += ' The service may be starting up - please wait a moment and try again.';
+        } else if (err.statusCode === 503) {
+          errorMessage += ' Please try again in a few moments.';
+        }
+      } else if (err instanceof ChatbotApiError) {
+        errorMessage = err.message;
       } else if (err instanceof Error) {
-        errorMessage = `Connection error: ${err.message}`;
+        // Handle generic errors
+        if (err.message.includes('Failed to fetch')) {
+          errorMessage = 'Unable to connect to the AI assistant. Please check your internet connection.';
+        } else {
+          errorMessage = `Connection error: ${err.message}`;
+        }
       }
       
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
+      setLocalError(errorMessage);
+      throw new ChatbotApiError(errorMessage);
     }
   };
 
   const clearError = () => {
-    setError(null);
+    setLocalError(null);
+    reset();
   };
 
   return {
     // State
-    isLoading,
-    error,
+    isLoading: loading,
+    error: localError || ragError,
+    isWarmingUp,
     // Actions
     askRag,
     clearError,
