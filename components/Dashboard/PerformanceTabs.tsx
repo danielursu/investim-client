@@ -30,10 +30,10 @@ export const PerformanceTabs = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("12M");
 
   return (
-    <div className="p-3 pt-1 mt-6">
-      <h2 className="text-lg font-bold">Portfolio Performance</h2>
+    <div className="px-4 py-6 animate-in fade-in duration-500 delay-200">
+      <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Portfolio Performance</h2>
       <Tabs defaultValue="overview">
-        <TabsList className="grid grid-cols-3 mb-4 mt-2">
+        <TabsList className="grid grid-cols-3 mb-6 mt-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="allocation">Allocation</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
@@ -43,7 +43,7 @@ export const PerformanceTabs = () => {
           <TooltipProvider>
             <Card className="mb-2 shadow-md rounded-2xl border-none bg-white">
               <div className="px-4 pt-4 pb-1">
-                <CardTitle className="text-base font-semibold text-gray-900">Growth Trend</CardTitle>
+                <CardTitle className="text-lg font-bold text-gray-900 tracking-tight">Growth Trend</CardTitle>
               </div>
               <CardContent className="pt-1">
                 <PeriodSelector 

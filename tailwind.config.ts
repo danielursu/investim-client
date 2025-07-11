@@ -9,6 +9,9 @@ const config: Config = {
     "*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
+  	screens: {
+  		// Disable all responsive breakpoints for mobile-only design
+  	},
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',
