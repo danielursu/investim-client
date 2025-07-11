@@ -72,13 +72,11 @@ export const wrapMathExpressions = (content: string): string => {
   
   return content
     // Wrap standalone mathematical equations (e.g., "FV = 10,000", "PMT = 250")
-    .replace(/\b([A-Z]{1,4})\s*=\s*([\d,\.\-]+(?:%|\$)?)/g, '$$$1 = $2$$')
-    // Wrap mathematical formulas with variables (e.g., "FV = PMT × [(1 + r)^n - 1] / r")
-    .replace(/\b([A-Z]{1,4})\s*=\s*([^\n\.\!?\;]{10,80}[\)\]\d%\$])/g, '$$$1 = $2$$')
-    // Wrap percentage expressions (e.g., "r = 3%", "rate = 0.03")
-    .replace(/\b([a-zA-Z]+)\s*=\s*(\d+(?:\.\d+)?%?)/g, '$$$1 = $2$$')
+    .replace(/\b([A-Z]{1,4})\s*=\s*([\d,\.\-]+(?:%|\$)?)/g, '$$' + '$1 = $2' + '$$')
+    // Wrap percentage expressions (lowercase variables like "r = 0.03")
+    .replace(/\b([a-z]+)\s*=\s*(\d+(?:\.\d+)?%?)/g, '$$' + '$1 = $2' + '$$')
     // Wrap expressions in brackets that look like formulas
-    .replace(/\[\s*([^[\]]+[+\-\*/\^]\s*[^[\]]*)\s*\]/g, '$$[$1]$$')
+    .replace(/\[\s*([^[\]]*[+\-\*/\^=][^[\]]*)\s*\]/g, '$$' + '[$1]' + '$$')
     // Clean up any double-wrapped expressions
     .replace(/\$\$\$\$/g, '$$')
     .replace(/\$\$\s*\$\$/g, '$$');
