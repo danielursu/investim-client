@@ -137,18 +137,6 @@ const MessageListComponent: React.FC<MessageListProps> = ({
         <Suspense fallback={<TextFallback content={sanitizeMarkdown(msg.content)} />}>
           <LazyMarkdownRenderer content={sanitizeMarkdown(msg.content)} />
         </Suspense>
-        {/* Debug: show raw content */}
-        {process.env.NODE_ENV === 'development' && (
-          <details className="mt-2 text-xs text-gray-500">
-            <summary>Debug: Raw content</summary>
-            <pre className="whitespace-pre-wrap text-xs bg-gray-100 p-2 rounded mt-1">
-              {JSON.stringify(msg.content, null, 2)}
-            </pre>
-            <pre className="whitespace-pre-wrap text-xs bg-blue-100 p-2 rounded mt-1">
-              {sanitizeMarkdown(msg.content)}
-            </pre>
-          </details>
-        )}
 
         {/* Enhanced Sources section */}
         {msg.sources && msg.sources.length > 0 && (

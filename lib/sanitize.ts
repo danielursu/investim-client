@@ -71,14 +71,12 @@ export const wrapMathExpressions = (content: string): string => {
   if (!content) return '';
   
   return content
-    // Wrap standalone mathematical equations (e.g., "FV = 10,000", "PMT = 250")  
-    .replace(/\b([A-Z]{1,4})\s*=\s*([\d,\.\-]+(?:%|\$)?)/g, '$$$1 = $2$$')
-    // Wrap percentage expressions (lowercase variables like "r = 0.03")
-    .replace(/\b([a-z]+)\s*=\s*(\d+(?:\.\d+)?%?)/g, '$$$1 = $2$$')
-    // Wrap expressions in brackets that look like formulas - use inline math
-    .replace(/\[\s*([^[\]]*[+\-\*/\^=\\][^[\]]*)\s*\]/g, '$[$1]$')
-    // Escape percentage signs in math expressions
-    .replace(/(\$[^$]*?)%([^$]*?\$)/g, '$1\\%$2')
+    // Convert LaTeX display math delimiters \[ ... \] to KaTeX $$ ... $$
+    .replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, '$$$$1$$')
+    // Convert inline LaTeX delimiters \( ... \) to KaTeX $ ... $
+    .replace(/\\\(\s*([\s\S]*?)\s*\\\)/g, '$$$1$$')
+    // Escape standalone percentage signs (but not those already escaped)
+    .replace(/(\d+(?:\.\d+)?)\s*%/g, '$1\\%')
     // Clean up any double-wrapped expressions
     .replace(/\$\$\$\$/g, '$$')
     .replace(/\$\$\s*\$\$/g, '$$');

@@ -4,6 +4,39 @@ import { riskQuizQuestions } from '@/data/risk-quiz-questions';
 import { moderateAllocation } from '@/data/portfolio-allocations';
 import { useChatStore } from '@/stores/chatStore';
 
+/**
+ * Calculate risk score based on quiz answers
+ * @param answers - Record of question IDs to answer values
+ * @returns Object with numerical score and risk level
+ */
+const calculateRiskProfile = (answers: Record<number, string>) => {
+  let totalScore = 0;
+  
+  // Calculate score based on answer values (a=1, b=2, c=3)
+  Object.values(answers).forEach(answer => {
+    switch (answer) {
+      case 'a': totalScore += 1; break;
+      case 'b': totalScore += 2; break;
+      case 'c': totalScore += 3; break;
+    }
+  });
+  
+  // Determine risk level based on total score (3-9 range)
+  let riskLevel: string;
+  if (totalScore <= 4) {
+    riskLevel = 'Conservative';
+  } else if (totalScore <= 6) {
+    riskLevel = 'Moderate';
+  } else {
+    riskLevel = 'Aggressive';
+  }
+  
+  return {
+    score: totalScore,
+    level: riskLevel
+  };
+};
+
 const moderateAllocationData: AssetAllocationData = {
   level: 'Moderate',
   etfs: moderateAllocation,
@@ -42,6 +75,7 @@ export const useRiskQuiz = (): UseRiskQuizReturn => {
   const setQuizActive = useChatStore((state) => state.setQuizActive);
   const setQuizCompleted = useChatStore((state) => state.setQuizCompleted);
   const setRiskProfile = useChatStore((state) => state.setRiskProfile);
+  const setRiskScore = useChatStore((state) => state.setRiskScore);
   const resetQuizStore = useChatStore((state) => state.resetQuiz);
 
   const startQuiz = useCallback((): ChatMessage[] => {
@@ -96,18 +130,25 @@ export const useRiskQuiz = (): UseRiskQuizReturn => {
         isComplete: false,
       };
     } else {
-      // Quiz complete
+      // Quiz complete - calculate actual risk profile
+      const updatedAnswers = { ...quizAnswers, [questionId]: answerValue };
+      const riskProfile = calculateRiskProfile(updatedAnswers);
+      
       setCurrentQuizQuestion(null);
       setQuizActive(false);
       setQuizCompleted(true);
-      setRiskProfile('Moderate');
+      setRiskProfile(riskProfile.level);
+      setRiskScore(riskProfile.score);
 
       const completionMessage: ChatMessage = {
         id: `quiz-complete-${Date.now()}`,
         type: 'text',
         role: 'bot',
-        content: 'Your risk level is Moderate. Here is a suggested ETF allocation:',
-        allocationData: moderateAllocationData,
+        content: `Your risk level is ${riskProfile.level} (Score: ${riskProfile.score}/9). Here is a suggested ETF allocation:`,
+        allocationData: {
+          level: riskProfile.level,
+          etfs: moderateAllocation, // TODO: Use different allocations based on risk level
+        },
         timestamp: new Date(),
       };
 
@@ -116,7 +157,7 @@ export const useRiskQuiz = (): UseRiskQuizReturn => {
         completionMessage,
       };
     }
-  }, [quizAnswers, currentQuizQuestionIndex, addQuizAnswer, setCurrentQuizQuestion, setQuizActive, setQuizCompleted, setRiskProfile]);
+  }, [quizAnswers, currentQuizQuestionIndex, addQuizAnswer, setCurrentQuizQuestion, setQuizActive, setQuizCompleted, setRiskProfile, setRiskScore]);
 
   const resetQuiz = useCallback(() => {
     resetQuizStore();
