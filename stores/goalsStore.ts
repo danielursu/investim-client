@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { shallow } from 'zustand/shallow';
 import { defaultGoals } from '@/data/portfolio-allocations';
 
 // Define the goal type with progress information
@@ -255,19 +254,16 @@ export const useCalculateProgress = () => useGoalsStore((state) => state.calcula
 
 // Deprecated: useGoalsActions (kept for backward compatibility)
 export const useGoalsActions = () =>
-  useGoalsStore(
-    (state) => ({
-      addGoal: state.addGoal,
-      updateGoal: state.updateGoal,
-      deleteGoal: state.deleteGoal,
-      updateGoalProgress: state.updateGoalProgress,
-      setGoals: state.setGoals,
-      resetGoals: state.resetGoals,
-      refreshGoals: state.refreshGoals,
-      calculateProgress: state.calculateProgress,
-    }),
-    shallow
-  );
+  useGoalsStore((state) => ({
+    addGoal: state.addGoal,
+    updateGoal: state.updateGoal,
+    deleteGoal: state.deleteGoal,
+    updateGoalProgress: state.updateGoalProgress,
+    setGoals: state.setGoals,
+    resetGoals: state.resetGoals,
+    refreshGoals: state.refreshGoals,
+    calculateProgress: state.calculateProgress,
+  }));
 
 export const useIsGoalsLoading = () => useGoalsStore((state) => state.isLoading);
 export const useGoalsError = () => useGoalsStore((state) => state.error);
@@ -275,14 +271,11 @@ export const useGoalsLastUpdated = () => useGoalsStore((state) => state.lastUpda
 
 // Deprecated: useGoalsState (do not use in components)
 export const useGoalsState = () =>
-  useGoalsStore(
-    (state) => ({
-      isLoading: state.isLoading,
-      error: state.error,
-      lastUpdated: state.lastUpdated,
-    }),
-    shallow
-  );
+  useGoalsStore((state) => ({
+    isLoading: state.isLoading,
+    error: state.error,
+    lastUpdated: state.lastUpdated,
+  }));
 
 export const useGoalById = (index: number) =>
   useGoalsStore((state) => state.goals[index]);
@@ -291,21 +284,18 @@ export const useGoalsCount = () =>
   useGoalsStore((state) => state.goals.length);
 
 export const useGoalsProgress = () =>
-  useGoalsStore(
-    (state) => {
-      const totalGoals = state.goals.length;
-      const completedGoals = state.goals.filter((goal) => (goal.progressPercent || 0) >= 100).length;
-      const averageProgress = totalGoals > 0 
-        ? state.goals.reduce((sum, goal) => sum + (goal.progressPercent || 0), 0) / totalGoals 
-        : 0;
-      return {
-        totalGoals,
-        completedGoals,
-        averageProgress: Math.round(averageProgress),
-      };
-    },
-    shallow
-  );
+  useGoalsStore((state) => {
+    const totalGoals = state.goals.length;
+    const completedGoals = state.goals.filter((goal) => (goal.progressPercent || 0) >= 100).length;
+    const averageProgress = totalGoals > 0 
+      ? state.goals.reduce((sum, goal) => sum + (goal.progressPercent || 0), 0) / totalGoals 
+      : 0;
+    return {
+      totalGoals,
+      completedGoals,
+      averageProgress: Math.round(averageProgress),
+    };
+  });
 
 export const useGoalsProgressShallow = () =>
   useGoalsStore((state) => {
@@ -320,4 +310,4 @@ export const useGoalsProgressShallow = () =>
       completedGoals,
       averageProgress: Math.round(averageProgress),
     };
-  }, shallow);
+  });

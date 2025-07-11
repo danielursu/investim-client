@@ -41,8 +41,14 @@ export function GoalManager({}: GoalManagerProps) {
   const isLoading = useIsGoalsLoading();
 
   const handleAddGoal = (goal: GoalFormValues) => {
+    // Convert Date to string for storage
+    const goalWithStringDate = {
+      ...goal,
+      targetDate: goal.targetDate.toISOString().split('T')[0] // Format as YYYY-MM-DD
+    };
+    
     // Use the store action to add the goal
-    addGoal(goal);
+    addGoal(goalWithStringDate);
     setDialogOpen(false); // Close dialog on submit
   }
 
@@ -99,15 +105,15 @@ export function GoalManager({}: GoalManagerProps) {
           <Button
             type="button"
             variant="outline"
-            className="w-full border-dashed border-gray-300 text-gray-500 mt-4"
+            className="w-full border-dashed border-2 border-gray-300 bg-white text-gray-700 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all duration-200 mt-6 py-3 text-base font-semibold min-h-[48px]"
             disabled={isLoading}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add New Goal
           </Button>
         </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="bg-transparent border-0 shadow-none p-0 max-w-lg">
+          <DialogHeader className="sr-only">
             <DialogTitle>Add New Investment Goal</DialogTitle>
           </DialogHeader>
           <AddGoalForm onSubmit={handleAddGoal} onCancel={() => setDialogOpen(false)} />
