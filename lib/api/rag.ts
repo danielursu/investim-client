@@ -170,7 +170,7 @@ export async function queryRAG(
         
         // If it's the last attempt, check for fallback or throw the error
         if (attempt === maxRetries - 1) {
-          if (shouldUseFallback(ragError)) {
+          if (shouldUseFallback(ragError) || ragError.message.includes('Name or service not known')) {
             console.warn('Using fallback response due to service unavailability');
             return getFallbackResponse(query);
           }

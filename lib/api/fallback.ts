@@ -11,7 +11,7 @@ const fallbackResponses: Record<string, QueryResponse> = {
     sources: []
   },
   investment: {
-    answer: "For investment advice, I'd typically analyze your risk profile and suggest appropriate ETF allocations. Since the advisory service is temporarily unavailable, I recommend consulting with a financial advisor for personalized investment guidance.",
+    answer: "An ETF (Exchange-Traded Fund) is an investment fund that tracks an index, commodity, bonds, or basket of assets like an index fund, but trades like a stock on an exchange. ETFs offer diversification, low costs, and liquidity. They're popular for building diversified portfolios. For personalized ETF recommendations based on your risk profile, please try again when our advisory service is available.",
     sources: []
   },
   portfolio: {
@@ -58,6 +58,8 @@ export function shouldUseFallback(error: Error): boolean {
     errorMessage.includes('404') ||
     errorMessage.includes('503') ||
     errorMessage.includes('not found') ||
-    errorMessage.includes('service unavailable')
+    errorMessage.includes('service unavailable') ||
+    errorMessage.includes('name or service not known') ||
+    errorMessage.includes('unexpected error')
   );
 }
