@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing query' }, { status: 400 });
     }
     
-    const apiRes = await fetch(env.FASTAPI_RAG_URL, {
+    const apiRes = await fetch(`${env.NEXT_PUBLIC_API_URL}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query }),

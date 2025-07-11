@@ -8,8 +8,8 @@
 
 import { getFallbackResponse, shouldUseFallback } from './fallback';
 
-// Environment configuration
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Use Next.js API route to avoid CORS issues
+const API_URL = '/api/rag';
 
 // TypeScript interfaces matching FastAPI response models
 export interface QueryRequest {
@@ -88,7 +88,7 @@ export async function queryRAG(
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout per attempt
 
     try {
-      const response = await fetch(`${API_URL}/query`, {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,15 +189,20 @@ export async function queryRAG(
 }
 
 /**
- * Check API health status
+ * Check API health status via Next.js API route
  */
 export async function checkAPIHealth(): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-    const response = await fetch(`${API_URL}/`, {
-      method: 'GET',
+    // Test with a simple query to check if the backend is working
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: 'health check' }),
       signal: controller.signal,
     });
 
@@ -210,17 +215,21 @@ export async function checkAPIHealth(): Promise<boolean> {
 }
 
 /**
- * Get detailed health status
+ * Get detailed health status via Next.js API route
  */
 export async function getHealthStatus(): Promise<HealthStatus | null> {
   try {
-    const response = await fetch(`${API_URL}/`);
+    // Use health check method since we're going through API route
+    const isHealthy = await checkAPIHealth();
     
-    if (!response.ok) {
-      return null;
+    if (isHealthy) {
+      return {
+        status: 'healthy',
+        service: 'Investim RAG API (via Next.js proxy)'
+      };
     }
-
-    return await response.json();
+    
+    return null;
   } catch (error) {
     console.error('Failed to get health status:', error);
     return null;

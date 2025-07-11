@@ -50,7 +50,7 @@ export function validateEnv() {
 // Validated environment configuration
 export const env = {
   FASTAPI_RAG_URL: process.env.FASTAPI_RAG_URL || 'http://127.0.0.1:8000/query',
-  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://investim-rag.onrender.com',
 };
 
 // Note: Validation is performed at request time in API routes
