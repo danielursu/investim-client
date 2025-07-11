@@ -71,12 +71,14 @@ export const wrapMathExpressions = (content: string): string => {
   if (!content) return '';
   
   return content
-    // Wrap standalone mathematical equations (e.g., "FV = 10,000", "PMT = 250")
-    .replace(/\b([A-Z]{1,4})\s*=\s*([\d,\.\-]+(?:%|\$)?)/g, '$$' + '$1 = $2' + '$$')
+    // Wrap standalone mathematical equations (e.g., "FV = 10,000", "PMT = 250")  
+    .replace(/\b([A-Z]{1,4})\s*=\s*([\d,\.\-]+(?:%|\$)?)/g, '$$$1 = $2$$')
     // Wrap percentage expressions (lowercase variables like "r = 0.03")
-    .replace(/\b([a-z]+)\s*=\s*(\d+(?:\.\d+)?%?)/g, '$$' + '$1 = $2' + '$$')
-    // Wrap expressions in brackets that look like formulas
-    .replace(/\[\s*([^[\]]*[+\-\*/\^=][^[\]]*)\s*\]/g, '$$' + '[$1]' + '$$')
+    .replace(/\b([a-z]+)\s*=\s*(\d+(?:\.\d+)?%?)/g, '$$$1 = $2$$')
+    // Wrap expressions in brackets that look like formulas - use inline math
+    .replace(/\[\s*([^[\]]*[+\-\*/\^=\\][^[\]]*)\s*\]/g, '$[$1]$')
+    // Escape percentage signs in math expressions
+    .replace(/(\$[^$]*?)%([^$]*?\$)/g, '$1\\%$2')
     // Clean up any double-wrapped expressions
     .replace(/\$\$\$\$/g, '$$')
     .replace(/\$\$\s*\$\$/g, '$$');
@@ -91,21 +93,13 @@ export const cleanRAGContent = (content: string): string => {
   let cleaned = content
     // Remove redundant reference markers like [1], [2], [3] at the end of sentences
     .replace(/\s+\[\d+\](?=[\.\,\;\:]?\s|$)/g, '')
-    // Clean up multiple consecutive spaces
-    .replace(/\s{2,}/g, ' ')
-    // Fix spacing around punctuation
-    .replace(/\s+([\.,;:!?])/g, '$1')
-    // Ensure proper spacing after periods
-    .replace(/\.([A-Z])/g, '. $1')
-    // Remove extra newlines but preserve paragraph breaks
-    .replace(/\n{3,}/g, '\n\n')
-    // Clean up bullet points and formatting
-    .replace(/^\s*[\*\-\+]\s+/gm, '• ')
     // Remove any remaining citation brackets in the middle of text
     .replace(/\[\d+\]/g, '')
+    // Clean up bullet points and formatting
+    .replace(/^\s*[\*\-\+]\s+/gm, '• ')
     .trim();
   
-  // Apply math expression wrapping
+  // Apply math expression wrapping after basic cleaning
   return wrapMathExpressions(cleaned);
 };
 
