@@ -14,15 +14,17 @@ export const PeriodSelector = ({ selectedPeriod, onPeriodChange }: PeriodSelecto
   return (
     <div className="flex justify-end gap-x-2 mt-1 mb-4">
       {PERIODS.map((period) => (
-        <Button 
+        <button 
           key={period}
-          size="sm" 
-          className="h-7 px-2 text-xs rounded" 
-          variant={selectedPeriod === period ? "default" : "outline"}
+          className={`h-8 px-3 text-sm rounded-lg transition-colors duration-150 font-medium min-w-[44px] inline-flex items-center justify-center will-change-auto transform-gpu ${
+            selectedPeriod === period 
+              ? "bg-primary text-white shadow-sm" 
+              : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 hover:border-primary hover:text-primary"
+          }`}
           onClick={() => onPeriodChange(period)}
         >
           {period}
-        </Button>
+        </button>
       ))}
     </div>
   )

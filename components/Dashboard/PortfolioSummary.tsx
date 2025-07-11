@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, TrendingDown } from "lucide-react"
+import { useState, useEffect } from "react"
 import { 
   usePortfolioTotalValue,
   usePortfolioGain,
@@ -14,17 +15,22 @@ export const PortfolioSummary = () => {
   const gain = usePortfolioGain();
   const gainPercentage = usePortfolioGainPercentage();
   const lastUpdated = usePortfolioLastUpdated();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // Determine if gain is positive or negative
   const isPositiveGain = gain >= 0;
   const TrendIcon = isPositiveGain ? TrendingUp : TrendingDown;
-  const trendColor = isPositiveGain ? "text-lime-200" : "text-red-200";
-  const gainText = isPositiveGain ? `+$${gain.toLocaleString()}` : `-$${Math.abs(gain).toLocaleString()}`;
+  const trendColor = isPositiveGain ? "text-green-100" : "text-red-100";
+  const gainText = isPositiveGain ? `+$${gain.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : `-$${Math.abs(gain).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
-    <div className="p-3">
+    <div className="px-4 py-3">
       <Card
-        className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg rounded-2xl border-none focus-visible:ring-2 focus-visible:ring-emerald-700 transition-all"
+        className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg rounded-2xl border-none focus-visible:ring-2 focus-visible:ring-emerald-700 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] transform"
         aria-label="Total Portfolio Value Card"
       >
         <CardHeader className="pb-2 pt-3">
@@ -32,12 +38,11 @@ export const PortfolioSummary = () => {
             <CardTitle className="text-sm font-medium opacity-90 tracking-wide">
               Total Portfolio Value
             </CardTitle>
-            {lastUpdated && (
+            {mounted && lastUpdated && (
               <span className="text-xs opacity-70">
                 Updated {lastUpdated.toLocaleTimeString([], { 
                   hour: '2-digit', 
-                  minute: '2-digit',
-                  timeZone: 'UTC' // Use UTC to ensure server/client consistency
+                  minute: '2-digit'
                 })}
               </span>
             )}
@@ -46,15 +51,15 @@ export const PortfolioSummary = () => {
         <CardContent>
           <div className="flex flex-col gap-1">
             <span
-              className="text-3xl sm:text-4xl font-extrabold tracking-tight drop-shadow-md"
+              className="text-4xl font-extrabold tracking-tight drop-shadow-md transition-all duration-300"
               aria-label="Portfolio Value"
             >
-              ${totalValue.toLocaleString()}
+              ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
-            <div className="flex items-center gap-1 mt-1">
-              <TrendIcon className={`h-4 w-4 mr-1 drop-shadow-sm ${trendColor}`} aria-hidden="true" />
-              <span className={`text-sm font-medium ${trendColor}`} aria-label="Portfolio Growth">
-                {gainText} ({isPositiveGain ? '+' : ''}{gainPercentage}%)
+            <div className="flex items-center gap-1 mt-2">
+              <TrendIcon className={`h-5 w-5 mr-1 drop-shadow-sm ${trendColor}`} aria-hidden="true" />
+              <span className={`text-base font-semibold ${trendColor} tracking-wide`} aria-label="Portfolio Growth">
+                {gainText} ({isPositiveGain ? '+' : ''}{gainPercentage.toFixed(1)}%)
               </span>
             </div>
           </div>
