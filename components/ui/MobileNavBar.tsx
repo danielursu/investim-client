@@ -30,7 +30,7 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white/60 backdrop-blur-md border-t border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] flex justify-around py-2 font-inter"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-t border-gray-200/60 shadow-[0_-4px_20px_0_rgba(0,0,0,0.1)] flex justify-around py-2 font-inter"
       role="navigation"
       aria-label="Main navigation"
     >
@@ -38,14 +38,14 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
         <Button
           key={key}
           variant="ghost"
-          className="flex flex-col items-center h-auto py-1 px-4 rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-emerald-500 data-[active=true]:text-emerald-600"
+          className="flex flex-col items-center h-auto py-2 px-4 rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary data-[active=true]:text-primary data-[active=true]:bg-primary/10 text-gray-600 hover:text-gray-800 hover:bg-gray-100 min-h-[56px]"
           aria-current={activeTab === key ? "page" : undefined}
           data-active={activeTab === key}
           tabIndex={0}
           onClick={() => onTabChange?.(key)}
         >
-          <Icon className="h-6 w-6 mb-1" />
-          <span className="text-xs">{label}</span>
+          <Icon className="h-6 w-6 mb-1.5" />
+          <span className="text-xs font-medium tracking-wide">{label}</span>
         </Button>
       ))}
     </nav>
