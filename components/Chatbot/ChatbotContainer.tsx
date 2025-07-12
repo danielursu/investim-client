@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { useRiskQuiz } from '@/hooks/useRiskQuiz';
 import { useChatAPI } from '@/hooks/useChatAPI';
 import { ChatHeader } from './ChatHeader';
@@ -11,6 +11,7 @@ import {
   useChatIsLoading,
   useChatError,
   useChatIsQuizActive,
+  useChatQuizCompleted,
   useChatAddMessage,
   useChatAddMessages,
   useChatClearMessages,
@@ -35,11 +36,16 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
   onClose,
   userAvatarUrl,
 }) => {
+  // State for managing animations
+  const [isClosing, setIsClosing] = useState(false);
+  const [shouldRender, setShouldRender] = useState(open);
+  
   // Get state from stores using individual selectors
   const messages = useChatMessages();
   const loading = useChatIsLoading();
   const error = useChatError();
   const isQuizActive = useChatIsQuizActive();
+  const quizCompleted = useChatQuizCompleted();
   
   // Get actions from stores
   const addMessage = useChatAddMessage();
@@ -65,9 +71,22 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Sync open state with store
+  // Sync open state with store and handle animations
   useEffect(() => {
-    setIsOpen(open);
+    if (open) {
+      setShouldRender(true);
+      setIsClosing(false);
+      setIsOpen(true);
+    } else if (shouldRender) {
+      setIsClosing(true);
+      setIsOpen(false);
+      // Wait for animation to complete before unmounting
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+        setIsClosing(false);
+      }, 300); // Match the animation duration
+      return () => clearTimeout(timer);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]); // setIsOpen is stable from Zustand
 
@@ -79,23 +98,37 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     if (open && messages.length === 0 && !initializationRef.current) {
       initializationRef.current = true;
       
-      const initialMessage: ChatMessage = {
-        id: `bot-init-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-        type: 'text',
-        role: 'bot',
-        content: 'Hello! To start, let\'s quickly assess your risk tolerance.',
-        timestamp: new Date(),
-      };
-      
-      addMessage(initialMessage);
-      
-      // Start quiz after a short delay
-      setTimeout(() => {
-        const quizMessages = startQuiz();
-        if (quizMessages.length > 0) {
-          addMessages(quizMessages);
-        }
-      }, 500);
+      // Different initialization based on quiz completion status
+      if (quizCompleted) {
+        // User has completed the quiz before - show welcome back message
+        const welcomeBackMessage: ChatMessage = {
+          id: `bot-welcome-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          type: 'text',
+          role: 'bot',
+          content: 'Welcome back! How can I help you with your investment questions today?',
+          timestamp: new Date(),
+        };
+        addMessage(welcomeBackMessage);
+      } else {
+        // First time or quiz not completed - start with quiz
+        const initialMessage: ChatMessage = {
+          id: `bot-init-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          type: 'text',
+          role: 'bot',
+          content: 'Hello! To start, let\'s quickly assess your risk tolerance.',
+          timestamp: new Date(),
+        };
+        
+        addMessage(initialMessage);
+        
+        // Start quiz after a short delay
+        setTimeout(() => {
+          const quizMessages = startQuiz();
+          if (quizMessages.length > 0) {
+            addMessages(quizMessages);
+          }
+        }, 500);
+      }
     }
     
     // Reset initialization flag when chat is closed
@@ -103,7 +136,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
       initializationRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, messages.length]); // Depend on both open state and message length
+  }, [open, messages.length, quizCompleted]); // Depend on quiz completion state
 
   // Handle quiz answer selection
   const onQuizAnswerSelect = useCallback((questionId: number, answerValue: string) => {
@@ -188,18 +221,21 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     return 'Type your message...';
   }, [isQuizActive]);
 
-  // Handle close with store update and clear messages for fresh start
+  // Handle close with store update but preserve messages in localStorage
   const handleClose = useCallback(() => {
     setIsOpen(false);
-    clearMessages(); // Clear messages for fresh start next time
+    // Don't clear messages - let them persist for better UX
+    // Only clear if user explicitly wants a fresh start
     onClose();
-  }, [onClose, setIsOpen, clearMessages]);
+  }, [onClose, setIsOpen]);
 
-  // Don't render if not open
-  if (!open) return null;
+  // Don't render if not open and not closing
+  if (!shouldRender) return null;
 
   return (
-    <div className="fixed bottom-16 right-4 w-[calc(100%-2rem)] max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200/50 max-h-[70vh] flex flex-col z-50 font-inter backdrop-blur-sm">
+    <div className={`fixed inset-0 bg-white flex flex-col z-40 font-inter transform transition-transform duration-300 ${
+      isClosing ? 'animate-slide-down' : 'animate-slide-up'
+    }`}>
       <ChatHeader onClose={handleClose} />
       
       <MessageList
@@ -212,12 +248,15 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
         isWarmingUp={isWarmingUp}
       />
       
-      <ChatInput
-        onSendMessage={handleSendMessage}
-        disabled={isQuizActive}
-        loading={loading}
-        placeholder={getInputPlaceholder()}
-      />
+      <div className="pb-24">
+        <ChatInput
+          onSendMessage={handleSendMessage}
+          disabled={isQuizActive}
+          loading={loading}
+          placeholder={getInputPlaceholder()}
+          showSuggestions={!isQuizActive && messages.length > 0}
+        />
+      </div>
     </div>
   );
 };

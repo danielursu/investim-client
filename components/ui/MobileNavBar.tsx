@@ -2,19 +2,19 @@
  * MobileNavBar - Glassmorphic bottom navigation bar for mobile UX
  * Uses shadcn/ui Button and Lucide icons. Glassmorphic, accessible, Inter font.
  */
-import { Home, BarChart3, Target, Settings } from "lucide-react"
+import { Home, BarChart3, Target, Settings, BotMessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import React from "react"
 
 export interface MobileNavBarProps {
   /**
-   * The current active tab (e.g. "home", "invest", "goals", "settings")
+   * The current active tab (e.g. "home", "invest", "chat", "goals", "settings")
    */
-  activeTab?: "home" | "invest" | "goals" | "settings"
+  activeTab?: "home" | "invest" | "chat" | "goals" | "settings"
   /**
    * Callback when a nav button is pressed
    */
-  onTabChange?: (tab: "home" | "invest" | "goals" | "settings") => void
+  onTabChange?: (tab: "home" | "invest" | "chat" | "goals" | "settings") => void
 }
 
 export const MobileNavBar: React.FC<MobileNavBarProps> = ({
@@ -24,6 +24,7 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
   const navItems = [
     { key: "home", label: "Home", icon: Home },
     { key: "invest", label: "Invest", icon: BarChart3 },
+    { key: "chat", label: "AI", icon: BotMessageSquare },
     { key: "goals", label: "Goals", icon: Target },
     { key: "settings", label: "Settings", icon: Settings },
   ] as const

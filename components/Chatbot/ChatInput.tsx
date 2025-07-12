@@ -1,12 +1,14 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { promptSuggestions } from '@/data/promptSuggestions';
 
 export interface ChatInputProps {
   onSendMessage: (message: string) => void;
   disabled: boolean;
   loading: boolean;
   placeholder?: string;
+  showSuggestions?: boolean;
 }
 
 /**
@@ -18,6 +20,7 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
   disabled,
   loading,
   placeholder = "Type your message...",
+  showSuggestions = false,
 }) => {
   const [inputValue, setInputValue] = useState<string>('');
 
@@ -34,6 +37,31 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
       e.preventDefault();
       handleSubmit(e as unknown as React.FormEvent);
     }
+  };
+
+  // Filter and sort suggestions based on input
+  const filteredSuggestions = useMemo(() => {
+    let filtered = promptSuggestions;
+    
+    // Filter by input text if present
+    if (inputValue.trim()) {
+      const searchTerm = inputValue.toLowerCase();
+      filtered = filtered.filter(s => 
+        s.text.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Sort by priority and show all that fit
+    return filtered.sort((a, b) => a.priority - b.priority);
+  }, [inputValue]);
+
+
+  // Handle suggestion click
+  const handleSuggestionClick = (text: string) => {
+    setInputValue(text);
+    // Auto-submit the suggestion
+    onSendMessage(text);
+    setInputValue('');
   };
 
   const LoadingSpinner = () => (
@@ -71,30 +99,51 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
   );
 
   return (
-    <form className="p-4 border-t border-gray-200/50 bg-white rounded-b-2xl" onSubmit={handleSubmit}>
-      <div className="flex items-center bg-gray-100 rounded-2xl px-4 py-3 transition-all duration-200 focus-within:bg-gray-50 focus-within:ring-2 focus-within:ring-emerald-500/20">
-        <input
-          type="text"
-          placeholder={placeholder}
-          className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          autoFocus
-          aria-label="Type your message"
-        />
-        <Button
-          size="icon"
-          className="h-8 w-8 rounded-full bg-emerald-600 hover:bg-emerald-700 ml-2 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-          type="submit"
-          disabled={loading || !inputValue.trim() || disabled}
-          aria-label="Send message"
-        >
-          {loading ? <LoadingSpinner /> : <SendIcon />}
-        </Button>
-      </div>
-    </form>
+    <div className="border-t border-gray-100 bg-white">
+      {/* Prompt Suggestions */}
+      {showSuggestions && (
+        <div className="px-4 py-3 border-b border-gray-100">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {filteredSuggestions.slice(0, 10).map(suggestion => (
+              <button
+                key={suggestion.id}
+                onClick={() => handleSuggestionClick(suggestion.text)}
+                className="inline-flex items-center px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 bg-transparent hover:bg-gray-50 rounded-full whitespace-nowrap transition-all border border-gray-200 hover:border-gray-300"
+              >
+                {suggestion.text}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+
+      {/* Input Form */}
+      <form className="p-4 pb-safe" onSubmit={handleSubmit}>
+        <div className="flex items-center bg-gray-50 rounded-full px-5 py-4 transition-all duration-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500 focus-within:shadow-md">
+          <input
+            type="text"
+            placeholder={placeholder}
+            className="flex-1 bg-transparent outline-none text-base text-gray-900 placeholder-gray-400 min-h-[24px]"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={disabled}
+            autoFocus
+            aria-label="Type your message"
+          />
+          <Button
+            size="icon"
+            className="h-10 w-10 rounded-full bg-emerald-600 hover:bg-emerald-700 ml-3 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            type="submit"
+            disabled={loading || !inputValue.trim() || disabled}
+            aria-label="Send message"
+          >
+            {loading ? <LoadingSpinner /> : <SendIcon />}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 

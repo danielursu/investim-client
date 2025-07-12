@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, lazy } from "react"
+import { Suspense, lazy, useState, useCallback } from "react"
 import { MobileNavBar } from "@/components/ui/MobileNavBar"
 import { 
   UserHeader, 
@@ -26,6 +26,27 @@ const SectionLoading = ({ height = "h-32" }: { height?: string }) => (
 );
 
 export default function InvestimClient() {
+  const [activeTab, setActiveTab] = useState<"home" | "invest" | "chat" | "goals" | "settings">("home");
+  const [previousTab, setPreviousTab] = useState<"home" | "invest" | "goals" | "settings">("home");
+  
+  const handleTabChange = useCallback((tab: "home" | "invest" | "chat" | "goals" | "settings") => {
+    if (tab === "chat" && activeTab === "chat") {
+      // Toggle off - return to previous tab
+      setActiveTab(previousTab);
+    } else if (tab === "chat") {
+      // Opening chat - save current tab as previous
+      setPreviousTab(activeTab === "chat" ? previousTab : activeTab as "home" | "invest" | "goals" | "settings");
+      setActiveTab("chat");
+    } else {
+      // Normal navigation
+      setPreviousTab(activeTab === "chat" ? previousTab : activeTab as "home" | "invest" | "goals" | "settings");
+      setActiveTab(tab);
+    }
+  }, [activeTab, previousTab]);
+  
+  const handleChatClose = useCallback(() => {
+    setActiveTab(previousTab);
+  }, [previousTab]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -55,8 +76,8 @@ export default function InvestimClient() {
         </div>
       </div>
 
-      <ChatInterface />
-      <MobileNavBar />
+      <ChatInterface open={activeTab === "chat"} onClose={handleChatClose} />
+      <MobileNavBar activeTab={activeTab} onTabChange={handleTabChange} />
     </div>
   )
 }

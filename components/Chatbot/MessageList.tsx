@@ -7,6 +7,7 @@ import { RiskQuizQuestion } from '@/components/RiskQuizQuestion';
 import { AssetAllocationChart } from '@/components/ui/AssetAllocationChart';
 import { sanitizeMarkdown, sanitizeSourceContent } from '@/lib/sanitize';
 import { ChatMessage } from '@/types';
+import { ThinkingShimmer } from '@/components/ui/thinking-shimmer';
 
 // Lazy load heavy markdown processing components
 const ReactMarkdown = lazy(() => import('react-markdown'));
@@ -73,7 +74,7 @@ const LazyMarkdownRenderer = ({ content }: { content: string }) => {
           code: ({ node, ...props }) => (
             <code 
               {...props} 
-              className="bg-gray-100 dark:bg-gray-800 rounded px-1 text-[13px]" 
+              className="bg-gray-100 rounded px-1 text-[13px]" 
             />
           ),
           ul: ({ node, ...props }) => (
@@ -128,11 +129,11 @@ const MessageListComponent: React.FC<MessageListProps> = ({
 
     return (
       <div
-        className={`rounded-lg px-3 py-2 max-w-[80%] shadow-sm text-sm ${
+        className={`rounded-2xl px-4 py-3 max-w-[85%] shadow-sm text-sm ${
           msg.role === 'user' 
             ? 'bg-emerald-600 text-white' 
-            : 'bg-white text-gray-900'
-        } font-inter prose prose-sm max-w-none break-words`}
+            : 'bg-gray-50 text-gray-900 border border-gray-100'
+        } font-inter prose prose-sm max-w-none break-words animate-scale-in`}
       >
         <Suspense fallback={<TextFallback content={sanitizeMarkdown(msg.content)} />}>
           <LazyMarkdownRenderer content={sanitizeMarkdown(msg.content)} />
@@ -235,7 +236,7 @@ const MessageListComponent: React.FC<MessageListProps> = ({
   }, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-gray-50/50 to-white">
+    <div className="flex-1 overflow-y-auto p-6 pb-2 space-y-4 bg-white">
       {uniqueMessages.map((msg) => (
         <div 
           key={msg.id} 
@@ -243,8 +244,8 @@ const MessageListComponent: React.FC<MessageListProps> = ({
         >
           {/* Bot avatar */}
           {msg.role === 'bot' && (
-            <Avatar className="h-6 w-6 mr-2 bg-white/50 mt-auto">
-              <AvatarFallback>
+            <Avatar className="h-6 w-6 mr-2 bg-gray-100 mt-auto">
+              <AvatarFallback className="bg-gray-100">
                 <BotMessageSquare className="h-4 w-4 text-emerald-600" />
               </AvatarFallback>
             </Avatar>
@@ -255,11 +256,11 @@ const MessageListComponent: React.FC<MessageListProps> = ({
           
           {/* User avatar */}
           {msg.role === 'user' && (
-            <Avatar className="h-6 w-6 ml-2 bg-white/50 mt-auto">
+            <Avatar className="h-6 w-6 ml-2 bg-gray-100 mt-auto">
               {userAvatarUrl ? (
                 <AvatarImage src={userAvatarUrl} alt="User avatar" />
               ) : (
-                <AvatarFallback>
+                <AvatarFallback className="bg-gray-100">
                   <User className="h-4 w-4 text-emerald-600" />
                 </AvatarFallback>
               )}
@@ -271,15 +272,18 @@ const MessageListComponent: React.FC<MessageListProps> = ({
       {/* API Warming Up indicator */}
       {isWarmingUp && !loading && (
         <div className="flex w-full justify-start">
-          <Avatar className="h-6 w-6 mr-2 bg-white/50 mt-auto">
-            <AvatarFallback>
+          <Avatar className="h-6 w-6 mr-2 bg-gray-100 mt-auto">
+            <AvatarFallback className="bg-gray-100">
               <BotMessageSquare className="h-4 w-4 text-emerald-600" />
             </AvatarFallback>
           </Avatar>
-          <div className="rounded-lg px-3 py-2 max-w-[80%] shadow-sm text-sm bg-yellow-50 text-yellow-800 border border-yellow-200">
+          <div className="rounded-2xl px-4 py-3 max-w-[85%] shadow-sm text-sm bg-yellow-50 text-yellow-800 border border-yellow-200 animate-scale-in">
             <div className="flex items-center">
-              <div className="animate-spin rounded-full h-3 w-3 border-b-1 border-yellow-600 mr-2"></div>
-              🔄 Waking up the AI assistant... This may take up to 60 seconds.
+              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-600 mr-2"></div>
+              🔄 <ThinkingShimmer 
+                text="Waking up the AI assistant... This may take up to 60 seconds." 
+                className="[--base-color:#d97706] [--base-gradient-color:#ea580c]"
+              />
             </div>
           </div>
         </div>
@@ -288,13 +292,13 @@ const MessageListComponent: React.FC<MessageListProps> = ({
       {/* Loading indicator */}
       {loading && !isWarmingUp && (
         <div className="flex w-full justify-start">
-          <Avatar className="h-6 w-6 mr-2 bg-white/50 mt-auto">
-            <AvatarFallback>
+          <Avatar className="h-6 w-6 mr-2 bg-gray-100 mt-auto">
+            <AvatarFallback className="bg-gray-100">
               <BotMessageSquare className="h-4 w-4 text-emerald-600" />
             </AvatarFallback>
           </Avatar>
-          <div className="rounded-lg px-3 py-2 max-w-[80%] shadow-sm text-sm bg-white text-gray-900 animate-pulse">
-            Thinking...
+          <div className="rounded-2xl px-4 py-3 max-w-[85%] shadow-sm text-sm bg-gray-50 text-gray-900 border border-gray-100 animate-scale-in">
+            <ThinkingShimmer />
           </div>
         </div>
       )}
