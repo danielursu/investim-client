@@ -11,22 +11,35 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { AddGoalForm } from "@/components/AddGoalForm"
 import { GoalFormValues } from "@/components/goalSchema"
-import { GoalCard } from "@/components/ui/GoalCard"
+import { GoalDisplayCards } from "@/components/ui/goal-display-cards"
 import { Card, CardContent } from "@/components/ui/card"
 import { getGoalIcon, IconName } from "@/constants/icons"
 import { useGoals, useAddGoal, useIsGoalsLoading } from "@/stores/goalsStore"
+import { forwardRef } from "react"
 
-// Helper function to get icon with consistent styling
+// Helper function to get icon with consistent styling for display cards
 const getIcon = (iconName: string): JSX.Element => {
   return (
-    <div className="h-5 w-5">
-      {getGoalIcon(iconName as IconName, 20)}
+    <div className="h-4 w-4">
+      {getGoalIcon(iconName as IconName, 16)}
     </div>
   );
 };
 
 // Re-export the type for backward compatibility
 export type { GoalWithProgress } from "@/stores/goalsStore";
+
+// Create a forwardRef wrapper for the Dialog trigger
+const AddGoalTrigger = forwardRef<HTMLDivElement, { onClick?: () => void; className?: string }>(
+  ({ onClick, className }, ref) => {
+    return (
+      <div ref={ref} onClick={onClick} className={className}>
+        {/* This will be replaced by the actual card content */}
+      </div>
+    );
+  }
+);
+AddGoalTrigger.displayName = "AddGoalTrigger";
 
 interface GoalManagerProps {
   // Remove initialGoals prop as we're now using the store
@@ -58,10 +71,32 @@ export function GoalManager({}: GoalManagerProps) {
     // TODO: Implement AI goal setup logic with store integration
   }
 
+  // Prepare the goals array with the add card
+  const goalsWithAddCard = [
+    ...goals.map((goal) => ({
+      title: goal.name,
+      icon: getIcon(goal.icon),
+      currentAmount: goal.currentAmount ? `$${goal.currentAmount}` : "$0",
+      targetAmount: typeof goal.amount === 'number' ? `$${goal.amount.toLocaleString()}` : goal.amount,
+      progressPercent: goal.progressPercent || 0,
+      targetDate: goal.targetDate,
+      description: goal.description,
+    })),
+    // Add the "Add Goal" card as the last item
+    {
+      title: "Add New Goal",
+      icon: <Plus className="h-4 w-4 text-gray-600" />,
+      isAddCard: true,
+      onClick: () => setDialogOpen(true),
+    }
+  ];
+
+  console.log('Goals count:', goalsWithAddCard.length);
+
   return (
-    <div className="space-y-4">
+    <div>
       {/* Display the list of goals or empty state */}
-      <div className="mt-4">
+      <div className="relative overflow-visible">
         {isLoading ? (
           <Card className="border-dashed border-gray-300 text-center py-8">
             <CardContent className="flex flex-col items-center justify-center space-y-4">
@@ -70,55 +105,41 @@ export function GoalManager({}: GoalManagerProps) {
             </CardContent>
           </Card>
         ) : goals.length === 0 ? (
-          <Card className="border-dashed border-gray-300 text-center py-8">
-            <CardContent className="flex flex-col items-center justify-center space-y-4">
-              <p className="text-gray-500">No goals set yet.</p>
-              <Button 
-                variant="default" 
-                className="bg-[#079669] hover:bg-[#067d5a] text-white" 
-                onClick={handleAiSetup}
-              >
-                Let the AI set up my first goal
-              </Button>
-            </CardContent>
-          </Card>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <AddGoalTrigger>
+                <GoalDisplayCards
+                  goals={[{
+                    title: "Add New Goal",
+                    icon: <Plus className="h-4 w-4 text-gray-600" />,
+                    isAddCard: true,
+                  }]}
+                  className=""
+                />
+              </AddGoalTrigger>
+            </DialogTrigger>
+            <DialogContent className="bg-transparent border-0 shadow-none p-0 max-w-lg">
+              <DialogHeader className="sr-only">
+                <DialogTitle>Add New Investment Goal</DialogTitle>
+              </DialogHeader>
+              <AddGoalForm onSubmit={handleAddGoal} onCancel={() => setDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
         ) : (
-          <>
-            {goals.map((goal, idx) => (
-              <GoalCard
-                key={`${goal.name}-${idx}`}
-                title={goal.name}
-                icon={getIcon(goal.icon)}
-                targetDescription={`Target: ${typeof goal.amount === 'number' ? `$${goal.amount.toLocaleString()}` : goal.amount} by ${goal.targetDate}`}
-                progressPercent={goal.progressPercent || 0}
-                currentAmount={goal.currentAmount ? `$${goal.currentAmount}` : "$0"}
-                targetAmount={typeof goal.amount === 'number' ? `$${goal.amount.toLocaleString()}` : goal.amount}
-              />
-            ))}
-          </>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <GoalDisplayCards
+              goals={goalsWithAddCard}
+              className=""
+            />
+            <DialogContent className="bg-transparent border-0 shadow-none p-0 max-w-lg">
+              <DialogHeader className="sr-only">
+                <DialogTitle>Add New Investment Goal</DialogTitle>
+              </DialogHeader>
+              <AddGoalForm onSubmit={handleAddGoal} onCancel={() => setDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
         )}
       </div>
-
-      {/* Dialog (Add New Goal button) always at the bottom */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full border-dashed border-2 border-gray-300 bg-white text-gray-700 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all duration-200 mt-6 py-3 text-base font-semibold min-h-[48px]"
-            disabled={isLoading}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Goal
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="bg-transparent border-0 shadow-none p-0 max-w-lg">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Add New Investment Goal</DialogTitle>
-          </DialogHeader>
-          <AddGoalForm onSubmit={handleAddGoal} onCancel={() => setDialogOpen(false)} />
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
