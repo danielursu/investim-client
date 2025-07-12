@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { RagResponse, ChatbotApiError } from '@/types';
 import { useRAGQuery } from '@/lib/api/useRAGQuery';
 import { RAGAPIError } from '@/lib/api/rag';
+import { 
+  useChatRiskProfile, 
+  useChatRiskScore, 
+  useChatQuizAnswers,
+  useChatQuizCompleted 
+} from '@/stores/chatStore';
 
 /**
  * Hook for managing chat API calls and error handling
@@ -23,12 +29,26 @@ export interface UseChatAPIReturn extends UseChatAPIState, UseChatAPIActions {}
 export const useChatAPI = (): UseChatAPIReturn => {
   const { query: queryRAG, loading, error: ragError, isWarmingUp, reset } = useRAGQuery();
   const [localError, setLocalError] = useState<string | null>(null);
+  
+  // Get user profile data for context
+  const riskProfile = useChatRiskProfile();
+  const riskScore = useChatRiskScore();
+  const quizAnswers = useChatQuizAnswers();
+  const quizCompleted = useChatQuizCompleted();
 
   const askRag = async (query: string): Promise<RagResponse> => {
     setLocalError(null);
 
     try {
-      await queryRAG(query);
+      // Prepare user context if quiz is completed
+      const userContext = quizCompleted ? {
+        riskProfile,
+        riskScore,
+        quizAnswers,
+        quizCompleted
+      } : undefined;
+
+      await queryRAG(query, userContext);
       
       // The queryRAG function handles the API call and updates the manager state
       // We need to get the latest data from the manager

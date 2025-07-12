@@ -14,6 +14,12 @@ const API_URL = '/api/rag';
 // TypeScript interfaces matching FastAPI response models
 export interface QueryRequest {
   query: string;
+  userContext?: {
+    riskProfile?: string | null;
+    riskScore?: number | null;
+    quizAnswers?: Record<number, string>;
+    quizCompleted?: boolean;
+  };
 }
 
 export interface SourceDocument {
@@ -77,6 +83,7 @@ export interface HealthStatus {
  */
 export async function queryRAG(
   query: string,
+  userContext?: QueryRequest['userContext'],
   maxRetries: number = 3
 ): Promise<QueryResponse> {
   if (!query.trim()) {
@@ -93,7 +100,7 @@ export async function queryRAG(
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query } as QueryRequest),
+        body: JSON.stringify({ query, userContext } as QueryRequest),
         signal: controller.signal,
       });
 
@@ -289,7 +296,7 @@ export class RAGQueryManager {
     this.listeners.forEach(listener => listener({ ...this.state }));
   }
 
-  async query(query: string): Promise<QueryResponse> {
+  async query(query: string, userContext?: QueryRequest['userContext']): Promise<QueryResponse> {
     this.state.loading = true;
     this.state.error = null;
     this.notify();
@@ -306,7 +313,7 @@ export class RAGQueryManager {
         this.notify();
       }
 
-      const data = await queryRAG(query);
+      const data = await queryRAG(query, userContext);
       this.state.data = data;
       this.state.loading = false;
       this.notify();

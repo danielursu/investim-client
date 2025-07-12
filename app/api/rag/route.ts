@@ -7,15 +7,21 @@ export async function POST(req: NextRequest) {
     validateEnv();
     
     const body = await req.json();
-    const { query } = body;
+    const { query, userContext } = body;
     if (!query) {
       return NextResponse.json({ error: 'Missing query' }, { status: 400 });
+    }
+    
+    // Prepare request payload with optional user context
+    const requestPayload: { query: string; userContext?: any } = { query };
+    if (userContext) {
+      requestPayload.userContext = userContext;
     }
     
     const apiRes = await fetch(`${env.NEXT_PUBLIC_API_URL}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify(requestPayload),
     });
     if (!apiRes.ok) {
       const errorText = await apiRes.text();

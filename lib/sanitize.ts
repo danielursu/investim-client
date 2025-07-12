@@ -72,9 +72,9 @@ export const wrapMathExpressions = (content: string): string => {
   
   return content
     // Convert LaTeX display math delimiters \[ ... \] to KaTeX $$ ... $$
-    .replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, '$$$$1$$')
+    .replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (_match, p1) => `$$${p1}$$`)
     // Convert inline LaTeX delimiters \( ... \) to KaTeX $ ... $
-    .replace(/\\\(\s*([\s\S]*?)\s*\\\)/g, '$$$1$$')
+    .replace(/\\\(\s*([\s\S]*?)\s*\\\)/g, (_match, p1) => `$${p1}$`)
     // Escape standalone percentage signs (but not those already escaped)
     .replace(/(\d+(?:\.\d+)?)\s*%/g, '$1\\%')
     // Clean up any double-wrapped expressions
@@ -88,7 +88,35 @@ export const wrapMathExpressions = (content: string): string => {
 export const cleanRAGContent = (content: string): string => {
   if (!content) return '';
   
-  let cleaned = content
+  // Store math expressions with placeholders to protect them during cleaning
+  const mathExpressions: string[] = [];
+  let mathIndex = 0;
+  
+  // Extract and replace math expressions with placeholders
+  let contentWithPlaceholders = content
+    // Extract display math $$ ... $$
+    .replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
+      mathExpressions.push(match);
+      return `__MATH_PLACEHOLDER_${mathIndex++}__`;
+    })
+    // Extract inline math $ ... $
+    .replace(/\$([^\$]+)\$/g, (match) => {
+      mathExpressions.push(match);
+      return `__MATH_PLACEHOLDER_${mathIndex++}__`;
+    })
+    // Extract LaTeX display math \[ ... \]
+    .replace(/\\\[([\s\S]*?)\\\]/g, (match) => {
+      mathExpressions.push(match);
+      return `__MATH_PLACEHOLDER_${mathIndex++}__`;
+    })
+    // Extract LaTeX inline math \( ... \)
+    .replace(/\\\(([\s\S]*?)\\\)/g, (match) => {
+      mathExpressions.push(match);
+      return `__MATH_PLACEHOLDER_${mathIndex++}__`;
+    });
+  
+  // Clean the content (without affecting math expressions)
+  let cleaned = contentWithPlaceholders
     // Remove redundant reference markers like [1], [2], [3] at the end of sentences
     .replace(/\s+\[\d+\](?=[\.\,\;\:]?\s|$)/g, '')
     // Remove any remaining citation brackets in the middle of text
@@ -96,6 +124,11 @@ export const cleanRAGContent = (content: string): string => {
     // Clean up bullet points and formatting
     .replace(/^\s*[\*\-\+]\s+/gm, '• ')
     .trim();
+  
+  // Restore math expressions
+  mathExpressions.forEach((expr, index) => {
+    cleaned = cleaned.replace(`__MATH_PLACEHOLDER_${index}__`, expr);
+  });
   
   // Apply math expression wrapping after basic cleaning
   return wrapMathExpressions(cleaned);

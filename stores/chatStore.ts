@@ -25,6 +25,7 @@ interface ChatState {
   quizAnswers: Record<number, string>;
   quizCompleted: boolean;
   riskProfile: string | null;
+  riskScore: number | null;
   
   // Preferences
   preferences: ChatPreferences;
@@ -53,6 +54,7 @@ interface ChatActions {
   addQuizAnswer: (questionId: number, answer: string) => void;
   setQuizCompleted: (completed: boolean) => void;
   setRiskProfile: (profile: string) => void;
+  setRiskScore: (score: number) => void;
   resetQuiz: () => void;
   
   // Preferences
@@ -69,7 +71,7 @@ type ChatStore = ChatState & ChatActions;
 // Default preferences
 const defaultPreferences: ChatPreferences = {
   autoScroll: true,
-  persistHistory: false, // Default to false for privacy
+  persistHistory: true, // Changed to true to persist chat history for better UX
   maxHistorySize: 100,
   soundEnabled: false,
   showTimestamps: true,
@@ -91,6 +93,7 @@ const initialState: ChatState = {
   quizAnswers: {},
   quizCompleted: false,
   riskProfile: null,
+  riskScore: null,
   preferences: defaultPreferences,
   lastUpdated: null,
   sessionId: generateSessionId(),
@@ -271,6 +274,16 @@ export const useChatStore = create<ChatStore>()(
             'setRiskProfile'
           ),
 
+        setRiskScore: (score) =>
+          set(
+            (state) => ({
+              ...state,
+              riskScore: score,
+            }),
+            false,
+            'setRiskScore'
+          ),
+
         resetQuiz: () =>
           set(
             (state) => ({
@@ -280,6 +293,7 @@ export const useChatStore = create<ChatStore>()(
               quizAnswers: {},
               quizCompleted: false,
               riskProfile: null,
+              riskScore: null,
             }),
             false,
             'resetQuiz'
@@ -337,12 +351,15 @@ export const useChatStore = create<ChatStore>()(
       }),
       {
         name: 'chat-storage',
-        // Simple persistence - just persist the essential state
+        // Simple persistence - persist essential state and messages if enabled
         partialize: (state) => ({
           preferences: state.preferences,
           quizAnswers: state.quizAnswers,
           quizCompleted: state.quizCompleted,
           riskProfile: state.riskProfile,
+          riskScore: state.riskScore,
+          // Only persist messages if user has enabled history persistence
+          messages: state.preferences.persistHistory ? state.messages : [],
         }),
       }
     ),
@@ -367,6 +384,7 @@ export const useChatCurrentQuizQuestionIndex = () => useChatStore((state) => sta
 export const useChatQuizAnswers = () => useChatStore((state) => state.quizAnswers);
 export const useChatQuizCompleted = () => useChatStore((state) => state.quizCompleted);
 export const useChatRiskProfile = () => useChatStore((state) => state.riskProfile);
+export const useChatRiskScore = () => useChatStore((state) => state.riskScore);
 
 export const useChatPreferences = () =>
   useChatStore((state) => state.preferences);
@@ -385,6 +403,7 @@ export const useChatSetCurrentQuizQuestion = () => useChatStore((state) => state
 export const useChatAddQuizAnswer = () => useChatStore((state) => state.addQuizAnswer);
 export const useChatSetQuizCompleted = () => useChatStore((state) => state.setQuizCompleted);
 export const useChatSetRiskProfile = () => useChatStore((state) => state.setRiskProfile);
+export const useChatSetRiskScore = () => useChatStore((state) => state.setRiskScore);
 export const useChatResetQuiz = () => useChatStore((state) => state.resetQuiz);
 export const useChatUpdatePreferences = () => useChatStore((state) => state.updatePreferences);
 export const useChatResetPreferences = () => useChatStore((state) => state.resetPreferences);

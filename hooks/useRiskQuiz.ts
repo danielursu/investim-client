@@ -80,8 +80,11 @@ export const useRiskQuiz = (): UseRiskQuizReturn => {
 
   const startQuiz = useCallback((): ChatMessage[] => {
     if (riskQuizQuestions.length > 0 && !isQuizActive) {
-      // Clear any previous quiz data when starting fresh
-      resetQuizStore();
+      // Only reset quiz data if it's not already completed
+      // This preserves completed quiz data in localStorage
+      if (!useChatStore.getState().quizCompleted) {
+        resetQuizStore();
+      }
       setQuizActive(true);
       setCurrentQuizQuestion(0);
       const firstQuestion = riskQuizQuestions[0];
@@ -146,7 +149,7 @@ export const useRiskQuiz = (): UseRiskQuizReturn => {
         role: 'bot',
         content: `Your risk level is ${riskProfile.level} (Score: ${riskProfile.score}/9). Here is a suggested ETF allocation:`,
         allocationData: {
-          level: riskProfile.level,
+          level: riskProfile.level as 'Conservative' | 'Moderate' | 'Aggressive',
           etfs: moderateAllocation, // TODO: Use different allocations based on risk level
         },
         timestamp: new Date(),

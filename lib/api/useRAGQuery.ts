@@ -6,10 +6,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { ragQueryManager, QueryResponse, UseRAGQueryState, checkAPIHealth } from './rag';
+import { ragQueryManager, QueryResponse, UseRAGQueryState, checkAPIHealth, QueryRequest } from './rag';
 
 export interface UseRAGQueryReturn {
-  query: (question: string) => Promise<void>;
+  query: (question: string, userContext?: QueryRequest['userContext']) => Promise<void>;
   data: QueryResponse | null;
   loading: boolean;
   error: string | null;
@@ -27,9 +27,9 @@ export function useRAGQuery(): UseRAGQueryReturn {
     return ragQueryManager.subscribe(setState);
   }, []);
 
-  const query = useCallback(async (question: string) => {
+  const query = useCallback(async (question: string, userContext?: QueryRequest['userContext']) => {
     try {
-      await ragQueryManager.query(question);
+      await ragQueryManager.query(question, userContext);
     } catch (error) {
       // Error is already handled in the manager
       console.error('Query failed:', error);
