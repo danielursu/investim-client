@@ -39,6 +39,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
   // State for managing animations
   const [isClosing, setIsClosing] = useState(false);
   const [shouldRender, setShouldRender] = useState(open);
+  const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
   
   // Get state from stores using individual selectors
   const messages = useChatMessages();
@@ -61,7 +62,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     handleAnswerSelect,
   } = useRiskQuiz();
 
-  const { askRag, isWarmingUp } = useChatAPI();
+  const { askRag, isWarmingUp, warmingStatus } = useChatAPI();
   
   // Create a ref for auto-scrolling
   const chatEndRef = React.useRef<HTMLDivElement | null>(null);
@@ -226,8 +227,28 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     setIsOpen(false);
     // Don't clear messages - let them persist for better UX
     // Only clear if user explicitly wants a fresh start
+    setPendingPrompt(null); // Clear any pending prompt
     onClose();
   }, [onClose, setIsOpen]);
+
+  // Handle suggested prompt selection during warming
+  const handleSuggestedPrompt = useCallback((prompt: string) => {
+    if (isWarmingUp) {
+      // Save the prompt to send when warming is complete
+      setPendingPrompt(prompt);
+    } else {
+      // Send immediately if not warming
+      handleSendMessage(prompt);
+    }
+  }, [isWarmingUp, handleSendMessage]);
+
+  // Send pending prompt when warming completes
+  React.useEffect(() => {
+    if (!isWarmingUp && pendingPrompt && !loading) {
+      handleSendMessage(pendingPrompt);
+      setPendingPrompt(null);
+    }
+  }, [isWarmingUp, pendingPrompt, loading, handleSendMessage]);
 
   // Don't render if not open and not closing
   if (!shouldRender) return null;
@@ -246,6 +267,8 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
         chatEndRef={chatEndRef}
         onAnswerSelect={onQuizAnswerSelect}
         isWarmingUp={isWarmingUp}
+        warmingStatus={warmingStatus}
+        onSuggestedPrompt={handleSuggestedPrompt}
       />
       
       <div className="pb-24">

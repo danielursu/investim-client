@@ -8,6 +8,9 @@ import { AssetAllocationChart } from '@/components/ui/AssetAllocationChart';
 import { sanitizeMarkdown, sanitizeSourceContent } from '@/lib/sanitize';
 import { ChatMessage } from '@/types';
 import { ThinkingShimmer } from '@/components/ui/thinking-shimmer';
+import { WarmingProgress } from '@/components/ui/warming-progress';
+import { WarmingSuggestions } from '@/components/ui/warming-suggestions';
+import { WarmingStatus } from '@/lib/api/rag';
 
 // Lazy load heavy markdown processing components
 const ReactMarkdown = lazy(() => import('react-markdown'));
@@ -102,6 +105,8 @@ export interface MessageListProps {
   chatEndRef: React.RefObject<HTMLDivElement>;
   onAnswerSelect: (questionId: number, answerValue: string) => void;
   isWarmingUp?: boolean;
+  warmingStatus?: WarmingStatus;
+  onSuggestedPrompt?: (prompt: string) => void;
 }
 
 /**
@@ -116,6 +121,8 @@ const MessageListComponent: React.FC<MessageListProps> = ({
   chatEndRef,
   onAnswerSelect,
   isWarmingUp = false,
+  warmingStatus,
+  onSuggestedPrompt,
 }) => {
   const renderMessage = (msg: ChatMessage) => {
     if (msg.type === 'quiz' && msg.questionData) {
@@ -269,23 +276,28 @@ const MessageListComponent: React.FC<MessageListProps> = ({
         </div>
       ))}
 
-      {/* API Warming Up indicator */}
+      {/* Enhanced API Warming Up indicator */}
       {isWarmingUp && !loading && (
-        <div className="flex w-full justify-start">
-          <Avatar className="h-6 w-6 mr-2 bg-gray-100 mt-auto">
-            <AvatarFallback className="bg-gray-100">
-              <BotMessageSquare className="h-4 w-4 text-emerald-600" />
-            </AvatarFallback>
-          </Avatar>
-          <div className="rounded-2xl px-4 py-3 max-w-[85%] shadow-sm text-sm bg-yellow-50 text-yellow-800 border border-yellow-200 animate-scale-in">
-            <div className="flex items-center">
-              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-600 mr-2"></div>
-              🔄 <ThinkingShimmer 
-                text="Waking up the AI assistant... This may take up to 60 seconds." 
-                className="[--base-color:#d97706] [--base-gradient-color:#ea580c]"
-              />
+        <div className="w-full space-y-4">
+          <div className="flex w-full justify-start">
+            <Avatar className="h-6 w-6 mr-2 bg-gray-100 mt-auto">
+              <AvatarFallback className="bg-gray-100">
+                <BotMessageSquare className="h-4 w-4 text-emerald-600" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="max-w-[85%]">
+              <WarmingProgress status={warmingStatus} isVisible={true} />
             </div>
           </div>
+          
+          {onSuggestedPrompt && (
+            <div className="px-8">
+              <WarmingSuggestions 
+                isVisible={true} 
+                onSelectSuggestion={onSuggestedPrompt}
+              />
+            </div>
+          )}
         </div>
       )}
 

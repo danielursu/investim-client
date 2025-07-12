@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RagResponse, ChatbotApiError } from '@/types';
 import { useRAGQuery } from '@/lib/api/useRAGQuery';
-import { RAGAPIError } from '@/lib/api/rag';
+import { RAGAPIError, WarmingStatus } from '@/lib/api/rag';
 import { 
   useChatRiskProfile, 
   useChatRiskScore, 
@@ -17,6 +17,7 @@ export interface UseChatAPIState {
   isLoading: boolean;
   error: string | null;
   isWarmingUp: boolean;
+  warmingStatus?: WarmingStatus;
 }
 
 export interface UseChatAPIActions {
@@ -27,7 +28,7 @@ export interface UseChatAPIActions {
 export interface UseChatAPIReturn extends UseChatAPIState, UseChatAPIActions {}
 
 export const useChatAPI = (): UseChatAPIReturn => {
-  const { query: queryRAG, loading, error: ragError, isWarmingUp, reset } = useRAGQuery();
+  const { query: queryRAG, loading, error: ragError, isWarmingUp, warmingStatus, reset } = useRAGQuery();
   const [localError, setLocalError] = useState<string | null>(null);
   
   // Get user profile data for context
@@ -115,6 +116,7 @@ export const useChatAPI = (): UseChatAPIReturn => {
     isLoading: loading,
     error: localError || ragError,
     isWarmingUp,
+    warmingStatus,
     // Actions
     askRag,
     clearError,
