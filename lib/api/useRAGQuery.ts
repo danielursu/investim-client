@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { ragQueryManager, QueryResponse, UseRAGQueryState, checkAPIHealth, QueryRequest } from './rag';
+import { ragQueryManager, QueryResponse, UseRAGQueryState, checkAPIHealth, QueryRequest, WarmingStatus } from './rag';
 
 export interface UseRAGQueryReturn {
   query: (question: string, userContext?: QueryRequest['userContext']) => Promise<void>;
@@ -14,6 +14,7 @@ export interface UseRAGQueryReturn {
   loading: boolean;
   error: string | null;
   isWarmingUp: boolean;
+  warmingStatus?: WarmingStatus;
   reset: () => void;
 }
 
@@ -46,6 +47,12 @@ export function useRAGQuery(): UseRAGQueryReturn {
     loading: state.loading,
     error: state.error,
     isWarmingUp: state.isWarmingUp,
+    warmingStatus: state.warmingStage && state.warmingProgress !== undefined ? {
+      stage: state.warmingStage,
+      progress: state.warmingProgress,
+      message: getWarmingMessage(state.warmingStage, state.warmingProgress),
+      estimatedTime: getEstimatedTime(state.warmingStage)
+    } : undefined,
     reset,
   };
 }
@@ -83,4 +90,25 @@ export function useAPIHealth() {
     checking,
     checkHealth,
   };
+}
+
+// Helper functions for warming status
+function getWarmingMessage(stage: string, progress: number): string {
+  const messages = {
+    initializing: 'Starting AI assistant...',
+    connecting: 'Connecting to server...',
+    loading: 'Loading AI models...',
+    ready: 'AI assistant is ready!'
+  };
+  return messages[stage as keyof typeof messages] || 'Preparing AI assistant...';
+}
+
+function getEstimatedTime(stage: string): number {
+  const times = {
+    initializing: 30,
+    connecting: 20,
+    loading: 10,
+    ready: 0
+  };
+  return times[stage as keyof typeof times] || 15;
 }
