@@ -15,7 +15,6 @@ import { GoalDisplayCards } from "@/components/ui/goal-display-cards"
 import { Card, CardContent } from "@/components/ui/card"
 import { getGoalIcon, IconName } from "@/constants/icons"
 import { useGoals, useAddGoal, useIsGoalsLoading } from "@/stores/goalsStore"
-import { forwardRef } from "react"
 
 // Helper function to get icon with consistent styling for display cards
 const getIcon = (iconName: string): JSX.Element => {
@@ -29,17 +28,7 @@ const getIcon = (iconName: string): JSX.Element => {
 // Re-export the type for backward compatibility
 export type { GoalWithProgress } from "@/stores/goalsStore";
 
-// Create a forwardRef wrapper for the Dialog trigger
-const AddGoalTrigger = forwardRef<HTMLDivElement, { onClick?: () => void; className?: string }>(
-  ({ onClick, className }, ref) => {
-    return (
-      <div ref={ref} onClick={onClick} className={className}>
-        {/* This will be replaced by the actual card content */}
-      </div>
-    );
-  }
-);
-AddGoalTrigger.displayName = "AddGoalTrigger";
+// Removed AddGoalTrigger - no longer needed as GoalDisplayCards handles clicks directly
 
 interface GoalManagerProps {
   // Remove initialGoals prop as we're now using the store
@@ -106,18 +95,15 @@ export function GoalManager({}: GoalManagerProps) {
           </Card>
         ) : goals.length === 0 ? (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <AddGoalTrigger>
-                <GoalDisplayCards
-                  goals={[{
-                    title: "Add New Goal",
-                    icon: <Plus className="h-4 w-4 text-gray-600" />,
-                    isAddCard: true,
-                  }]}
-                  className=""
-                />
-              </AddGoalTrigger>
-            </DialogTrigger>
+            <GoalDisplayCards
+              goals={[{
+                title: "Add New Goal",
+                icon: <Plus className="h-4 w-4 text-gray-600" />,
+                isAddCard: true,
+                onClick: () => setDialogOpen(true),
+              }]}
+              className=""
+            />
             <DialogContent className="bg-transparent border-0 shadow-none p-0 max-w-lg">
               <DialogHeader className="sr-only">
                 <DialogTitle>Add New Investment Goal</DialogTitle>
