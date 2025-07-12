@@ -133,8 +133,10 @@ describe('Chatbot Component', () => {
     await user.type(input, 'What are ETFs?')
     await user.click(sendButton)
     
-    // Should show loading state
-    expect(screen.getByText('Thinking...')).toBeInTheDocument()
+    // Should show loading state (shimmer component)
+    await waitFor(() => {
+      expect(screen.getByText('Thinking...')).toBeInTheDocument()
+    })
     
     // Should receive response
     await waitFor(() => {
@@ -192,8 +194,10 @@ describe('Chatbot Component', () => {
     
     await user.type(input, 'Test message{enter}')
     
-    // Should show loading state
-    expect(screen.getByText('Thinking...')).toBeInTheDocument()
+    // Should show loading state (shimmer component)
+    await waitFor(() => {
+      expect(screen.getByText('Thinking...')).toBeInTheDocument()
+    })
   })
 
   it('prevents submission of empty messages', async () => {

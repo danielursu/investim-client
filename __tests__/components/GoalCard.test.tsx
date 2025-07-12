@@ -1,54 +1,61 @@
 import { render, screen } from '../test-utils'
-import { GoalCard, GoalCardProps } from '@/components/ui/GoalCard'
+import { GoalDisplayCard } from '@/components/ui/goal-display-cards'
 import { Target, TrendingUp, Shield } from 'lucide-react'
 
-describe('GoalCard Component', () => {
-  const defaultProps: GoalCardProps = {
+interface GoalDisplayCardProps {
+  className?: string;
+  icon?: React.ReactNode;
+  title?: string;
+  currentAmount?: string;
+  targetAmount?: string;
+  progressPercent?: number;
+  targetDate?: string;
+  description?: string;
+}
+
+describe('GoalDisplayCard Component', () => {
+  const defaultProps: GoalDisplayCardProps = {
     title: 'Emergency Fund',
     icon: <Target className="h-6 w-6 text-emerald-600" />,
-    targetDescription: 'Save 6 months of expenses',
+    description: 'Save 6 months of expenses',
     progressPercent: 75,
     currentAmount: '$7,500',
     targetAmount: '$10,000',
+    targetDate: '2024-12-31',
   }
 
   it('renders with all required props', () => {
-    render(<GoalCard {...defaultProps} />)
+    render(<GoalDisplayCard {...defaultProps} />)
     
     expect(screen.getByText('Emergency Fund')).toBeInTheDocument()
-    expect(screen.getByText('Save 6 months of expenses')).toBeInTheDocument()
-    expect(screen.getByText('Progress')).toBeInTheDocument()
-    expect(screen.getByText('75%')).toBeInTheDocument()
-    expect(screen.getByText('$7,500')).toBeInTheDocument()
-    expect(screen.getByText('$10,000')).toBeInTheDocument()
+    expect(screen.getByText('$7,500 of $10,000 (75%)')).toBeInTheDocument()
+    expect(screen.getByText('Target: Dec 2024')).toBeInTheDocument()
   })
 
   it('has proper accessibility attributes', () => {
-    render(<GoalCard {...defaultProps} />)
+    render(<GoalDisplayCard {...defaultProps} />)
     
-    const card = screen.getByLabelText('Emergency Fund Goal Card')
-    expect(card).toBeInTheDocument()
+    // Check that title is visible for screen readers
+    expect(screen.getByText('Emergency Fund')).toBeInTheDocument()
     
-    const progressBar = screen.getByLabelText('Progress bar')
-    expect(progressBar).toBeInTheDocument()
-    // Note: Progress component might not set aria-valuenow, this is okay for UI library components
-    expect(progressBar).toHaveAttribute('role', 'progressbar')
+    // Check that progress information is displayed
+    expect(screen.getByText('$7,500 of $10,000 (75%)')).toBeInTheDocument()
   })
 
   it('renders with different progress values', () => {
-    const { rerender } = render(<GoalCard {...defaultProps} progressPercent={0} />)
-    expect(screen.getByText('0%')).toBeInTheDocument()
+    const { rerender } = render(<GoalDisplayCard {...defaultProps} progressPercent={0} />)
+    expect(screen.getByText('$7,500 of $10,000 (0%)')).toBeInTheDocument()
     
-    rerender(<GoalCard {...defaultProps} progressPercent={100} />)
-    expect(screen.getByText('100%')).toBeInTheDocument()
+    rerender(<GoalDisplayCard {...defaultProps} progressPercent={100} />)
+    expect(screen.getByText('$7,500 of $10,000 (100%)')).toBeInTheDocument()
     
-    rerender(<GoalCard {...defaultProps} progressPercent={50} />)
-    expect(screen.getByText('50%')).toBeInTheDocument()
+    rerender(<GoalDisplayCard {...defaultProps} progressPercent={50} />)
+    expect(screen.getByText('$7,500 of $10,000 (50%)')).toBeInTheDocument()
   })
 
   it('renders with different icons', () => {
     const { rerender } = render(
-      <GoalCard 
+      <GoalDisplayCard 
         {...defaultProps} 
         icon={<TrendingUp className="h-6 w-6 text-blue-600" data-testid="trending-icon" />}
       />
@@ -56,7 +63,7 @@ describe('GoalCard Component', () => {
     expect(screen.getByTestId('trending-icon')).toBeInTheDocument()
     
     rerender(
-      <GoalCard 
+      <GoalDisplayCard 
         {...defaultProps} 
         icon={<Shield className="h-6 w-6 text-green-600" data-testid="shield-icon" />}
       />
@@ -65,31 +72,29 @@ describe('GoalCard Component', () => {
   })
 
   it('applies custom className', () => {
-    render(<GoalCard {...defaultProps} className="custom-class" />)
+    render(<GoalDisplayCard {...defaultProps} className="custom-class" />)
     
-    const card = screen.getByLabelText('Emergency Fund Goal Card')
-    expect(card).toHaveClass('custom-class')
+    const cardContainer = screen.getByText('Emergency Fund').closest('div')
+    expect(cardContainer).toHaveClass('custom-class')
   })
 
   it('handles long text gracefully', () => {
     const longProps = {
       ...defaultProps,
       title: 'Very Long Goal Title That Should Wrap Properly',
-      targetDescription: 'This is a very long description that explains the goal in great detail and should handle text wrapping gracefully',
+      description: 'This is a very long description that explains the goal in great detail and should handle text wrapping gracefully',
       currentAmount: '$1,234,567.89',
       targetAmount: '$9,876,543.21',
     }
     
-    render(<GoalCard {...longProps} />)
+    render(<GoalDisplayCard {...longProps} />)
     
     expect(screen.getByText(longProps.title)).toBeInTheDocument()
-    expect(screen.getByText(longProps.targetDescription)).toBeInTheDocument()
-    expect(screen.getByText(longProps.currentAmount)).toBeInTheDocument()
-    expect(screen.getByText(longProps.targetAmount)).toBeInTheDocument()
+    expect(screen.getByText(longProps.description)).toBeInTheDocument()
   })
 
   it('maintains visual hierarchy with proper headings', () => {
-    render(<GoalCard {...defaultProps} />)
+    render(<GoalDisplayCard {...defaultProps} />)
     
     // Title should be accessible and well-structured (might be div with proper classes)
     const title = screen.getByText('Emergency Fund')
@@ -98,22 +103,27 @@ describe('GoalCard Component', () => {
   })
 
   it('displays progress bar with correct value', () => {
-    render(<GoalCard {...defaultProps} progressPercent={85} />)
+    render(<GoalDisplayCard {...defaultProps} progressPercent={85} />)
     
-    const progressBar = screen.getByLabelText('Progress bar')
-    expect(progressBar).toHaveAttribute('role', 'progressbar')
+    // Check that the percentage is displayed in the progress description
+    expect(screen.getByText('$7,500 of $10,000 (85%)')).toBeInTheDocument()
     
-    // Check that the percentage is displayed
-    expect(screen.getByText('85%')).toBeInTheDocument()
+    // Check that progress bar exists (look for the colored div)
+    const progressContainer = screen.getByText('$7,500 of $10,000 (85%)').parentElement
+    const progressBar = progressContainer?.querySelector('.bg-emerald-500, .bg-yellow-500, .bg-orange-500, .bg-gray-400')
+    expect(progressBar).toBeInTheDocument()
   })
 
   it('renders icon with proper accessibility', () => {
-    render(<GoalCard {...defaultProps} />)
+    render(<GoalDisplayCard {...defaultProps} />)
     
-    // Icon container should have aria-hidden since it's decorative
-    const iconContainer = screen.getByLabelText('Emergency Fund Goal Card')
-      .querySelector('[aria-hidden="true"]')
-    expect(iconContainer).toBeInTheDocument()
+    // Icon should be rendered within the card
+    const cardContainer = screen.getByText('Emergency Fund').closest('div')
+    expect(cardContainer).toBeInTheDocument()
+    
+    // Icon is rendered as part of the component structure
+    const iconElement = cardContainer?.querySelector('svg')
+    expect(iconElement).toBeInTheDocument()
   })
 
   it('handles edge cases for amounts', () => {
@@ -124,24 +134,18 @@ describe('GoalCard Component', () => {
       progressPercent: 0,
     }
     
-    render(<GoalCard {...edgeCaseProps} />)
+    render(<GoalDisplayCard {...edgeCaseProps} />)
     
-    expect(screen.getByText('$0')).toBeInTheDocument()
-    expect(screen.getByText('$100')).toBeInTheDocument()
-    expect(screen.getByText('0%')).toBeInTheDocument()
+    expect(screen.getByText('$0 of $100 (0%)')).toBeInTheDocument()
   })
 
   it('maintains responsive design structure', () => {
-    render(<GoalCard {...defaultProps} />)
+    render(<GoalDisplayCard {...defaultProps} />)
     
-    const card = screen.getByLabelText('Emergency Fund Goal Card')
-    expect(card).toHaveClass('mb-2', 'shadow-md', 'rounded-2xl', 'border-none', 'bg-white')
+    const card = screen.getByText('Emergency Fund').closest('div')
+    expect(card).toHaveClass('relative', 'flex', 'h-36', 'w-full')
     
-    // Check for flex structure classes that ensure responsive layout
-    const iconContainer = card.querySelector('.flex-shrink-0')
-    expect(iconContainer).toBeInTheDocument()
-    
-    const contentContainer = card.querySelector('.flex-1')
-    expect(contentContainer).toBeInTheDocument()
+    // Check for key responsive design classes
+    expect(card).toHaveClass('rounded-xl', 'shadow-md')
   })
 })

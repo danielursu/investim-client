@@ -85,7 +85,7 @@ test.describe('Chatbot E2E Tests', () => {
     const sendButton = page.locator('button[aria-label="Send"], button[type="submit"]').last();
     await sendButton.click();
 
-    // Verify loading state
+    // Verify loading state (shimmer effect)
     await expect(page.locator('text=Thinking...')).toBeVisible();
 
     // Wait for response
@@ -114,7 +114,7 @@ test.describe('Chatbot E2E Tests', () => {
     await chatInput.fill('Test message');
     await chatInput.press('Enter');
 
-    // Verify message was sent
+    // Verify message was sent (shimmer effect)
     await expect(page.locator('text=Thinking...')).toBeVisible();
   });
 
