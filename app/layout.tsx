@@ -19,13 +19,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
       </head>
       <body>
         <ErrorBoundary>
           <ThemeProvider 
             attribute="class" 
-            defaultTheme="system" 
-            enableSystem
+            defaultTheme="light" 
+            enableSystem={false}
             disableTransitionOnChange
           >
             <PerformanceMonitor />
