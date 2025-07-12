@@ -30,7 +30,7 @@ export const PerformanceTabs = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("12M");
 
   return (
-    <div className="px-4 py-6 animate-in fade-in duration-500 delay-200">
+    <div className="px-4 pb-6 pt-1 animate-in fade-in duration-500 delay-200">
       <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Portfolio Performance</h2>
       <Tabs defaultValue="overview">
         <TabsList className="grid grid-cols-3 mb-6 mt-4">
