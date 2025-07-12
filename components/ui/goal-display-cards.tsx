@@ -171,7 +171,7 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
       ref={containerRef}
       className={cn("relative flex justify-end items-center opacity-100 animate-in fade-in-0 duration-700 min-h-[180px] overflow-visible pt-16 pr-8", className)}
     >
-      <div className="relative w-[320px] h-[160px]" style={{ right: '-40px' }}>
+      <div className="relative w-[320px] h-[160px]" style={{ right: '-72px' }}>
         {orderedGoals.slice(0, 3).map((goal, index) => (
           <div 
             key={`goal-${index}`}
@@ -185,7 +185,7 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
             }}
             className="absolute cursor-pointer"
             style={{
-              transform: `translateX(${-index * 45}px) translateY(${-index * 35}px)`,
+              transform: `translateX(${-index * 40}px) translateY(${-index * 40}px)`,
               zIndex: 30 - (index * 10),
             }}
           >
