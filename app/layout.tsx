@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { PerformanceMonitor } from '@/components/PerformanceMonitor'
+import { APIWarmer } from '@/components/APIWarmer'
 
 export const metadata: Metadata = {
   title: 'Investim',
@@ -30,6 +31,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <PerformanceMonitor />
+            <APIWarmer />
             {children}
             <Toaster />
           </ThemeProvider>
