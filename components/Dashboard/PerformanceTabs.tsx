@@ -16,13 +16,13 @@ const AssetAllocationChart = lazy(() => import("@/components/ui/AssetAllocationC
 // Loading components for charts
 const ChartLoading = () => (
   <div className="w-full h-48 rounded-md flex items-center justify-center bg-gray-50 animate-pulse">
-    <div className="text-sm text-gray-500">Loading chart...</div>
+    <div className="text-sm text-gray-700">Loading chart...</div>
   </div>
 );
 
 const AllocationLoading = () => (
   <div className="w-full h-[300px] rounded-md flex items-center justify-center bg-gray-50 animate-pulse">
-    <div className="text-sm text-gray-500">Loading allocation chart...</div>
+    <div className="text-sm text-gray-700">Loading allocation chart...</div>
   </div>
 );
 
@@ -110,31 +110,59 @@ export const PerformanceTabs = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-medium">Auto-Investment</p>
-                    <p className="text-sm text-gray-500">Apr 10, 2025</p>
+                    <p className="font-medium text-gray-900">Auto-Investment</p>
+                    <p className="text-sm text-gray-700">Apr 10, 2025</p>
                   </div>
                   <p className="font-medium text-emerald-600">+$500.00</p>
                 </div>
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-medium">Dividend Payment</p>
-                    <p className="text-sm text-gray-500">Apr 5, 2025</p>
+                    <p className="font-medium text-gray-900">Dividend Payment</p>
+                    <p className="text-sm text-gray-700">Apr 5, 2025</p>
                   </div>
                   <p className="font-medium text-emerald-600">+$78.32</p>
                 </div>
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-medium">Auto-Investment</p>
-                    <p className="text-sm text-gray-500">Mar 25, 2025</p>
+                    <p className="font-medium text-gray-900">Auto-Investment</p>
+                    <p className="text-sm text-gray-700">Mar 25, 2025</p>
                   </div>
                   <p className="font-medium text-emerald-600">+$500.00</p>
                 </div>
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-medium">Portfolio Rebalance</p>
-                    <p className="text-sm text-gray-500">Mar 15, 2025</p>
+                    <p className="font-medium text-gray-900">Management Fee</p>
+                    <p className="text-sm text-gray-700">Mar 20, 2025</p>
                   </div>
-                  <p className="font-medium text-gray-500">-</p>
+                  <p className="font-medium text-red-600">-$12.50</p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-900">Portfolio Rebalance</p>
+                    <p className="text-sm text-gray-700">Mar 15, 2025</p>
+                  </div>
+                  <p className="font-medium text-gray-500">$0.00</p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-900">Partial Withdrawal</p>
+                    <p className="text-sm text-gray-700">Mar 8, 2025</p>
+                  </div>
+                  <p className="font-medium text-red-600">-$200.00</p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-900">Interest Payment</p>
+                    <p className="text-sm text-gray-700">Mar 1, 2025</p>
+                  </div>
+                  <p className="font-medium text-emerald-600">+$24.68</p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-900">One-time Investment</p>
+                    <p className="text-sm text-gray-700">Feb 28, 2025</p>
+                  </div>
+                  <p className="font-medium text-emerald-600">+$1,000.00</p>
                 </div>
               </div>
             </CardContent>

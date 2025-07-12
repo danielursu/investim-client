@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { ReactNode, useState, useEffect, useRef } from "react";
+import { Plus } from "lucide-react";
 
 interface GoalDisplayCardProps {
   className?: string;
@@ -53,7 +54,7 @@ function GoalDisplayCard({
       <div
         onClick={onClick}
         className={cn(
-          "relative flex h-32 w-[280px] sm:w-[320px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/70 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-emerald-500 hover:bg-emerald-50/50 cursor-pointer overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2",
+          "relative flex h-32 w-[280px] sm:w-[320px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-dashed border-emerald-400/70 bg-emerald-50/80 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-emerald-500 cursor-pointer overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2 shadow-lg shadow-emerald-100/50",
           className
         )}
       >
@@ -65,10 +66,10 @@ function GoalDisplayCard({
         
         {/* Bottom section with icon and text */}
         <div>
-          <span className="relative inline-block rounded-full p-2 bg-gray-100">
-            {icon}
+          <span className="relative inline-block rounded-full p-2 bg-emerald-100 border border-emerald-200">
+            <Plus className="h-4 w-4 text-emerald-600" />
           </span>
-          <p className="text-base font-medium text-gray-700">Add New Goal</p>
+          <p className="text-base font-semibold text-emerald-700">Add New Goal</p>
         </div>
       </div>
     );
@@ -101,9 +102,9 @@ function GoalDisplayCard({
           <div 
             className={cn(
               "h-1.5 rounded-full transition-all duration-500",
-              progressPercent >= 75 ? "bg-emerald-600" :
-              progressPercent >= 50 ? "bg-yellow-600" :
-              progressPercent >= 25 ? "bg-orange-600" : "bg-gray-500"
+              progressPercent >= 75 ? "bg-gradient-to-r from-emerald-500 to-emerald-600" :
+              progressPercent >= 50 ? "bg-gradient-to-r from-emerald-400 to-emerald-500" :
+              progressPercent >= 25 ? "bg-gradient-to-r from-emerald-300 to-emerald-400" : "bg-gradient-to-r from-emerald-200 to-emerald-300"
             )}
             style={{ width: `${Math.min(progressPercent, 100)}%` }}
           />
@@ -168,7 +169,7 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
   return (
     <div 
       ref={containerRef}
-      className={cn("relative flex justify-end items-center opacity-100 animate-in fade-in-0 duration-700 min-h-[180px] overflow-visible py-4 pr-8", className)}
+      className={cn("relative flex justify-end items-center opacity-100 animate-in fade-in-0 duration-700 min-h-[180px] overflow-visible pt-16 pr-8", className)}
     >
       <div className="relative w-[320px] h-[160px]" style={{ right: '-40px' }}>
         {orderedGoals.slice(0, 3).map((goal, index) => (
@@ -184,7 +185,7 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
             }}
             className="absolute cursor-pointer"
             style={{
-              transform: `translateX(${-index * 8}px) translateY(${-index * 6}px)`,
+              transform: `translateX(${-index * 45}px) translateY(${-index * 35}px)`,
               zIndex: 30 - (index * 10),
             }}
           >
@@ -194,7 +195,7 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
                 "transition-all duration-300",
                 index === 0 ? "" : index === 1 ? "opacity-98" : "opacity-95",
                 activeCardIndex === index ? "-translate-y-8" : "",
-                "hover:-translate-y-6"
+                "hover:-translate-y-20"
               )}
             />
           </div>
