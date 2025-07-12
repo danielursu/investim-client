@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { AddGoalForm } from "@/components/AddGoalForm"
 import { GoalFormValues } from "@/components/goalSchema"
-import { GoalDisplayCards } from "@/components/ui/goal-display-cards"
+import { GoalCarousel } from "@/components/GoalCarousel"
 import { Card, CardContent } from "@/components/ui/card"
 import { getGoalIcon, IconName } from "@/constants/icons"
 import { useGoals, useAddGoal, useIsGoalsLoading } from "@/stores/goalsStore"
@@ -95,7 +95,7 @@ export function GoalManager({}: GoalManagerProps) {
           </Card>
         ) : goals.length === 0 ? (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <GoalDisplayCards
+            <GoalCarousel
               goals={[{
                 title: "Add New Goal",
                 icon: <Plus className="h-4 w-4 text-gray-600" />,
@@ -113,7 +113,7 @@ export function GoalManager({}: GoalManagerProps) {
           </Dialog>
         ) : (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <GoalDisplayCards
+            <GoalCarousel
               goals={goalsWithAddCard}
               className=""
             />
