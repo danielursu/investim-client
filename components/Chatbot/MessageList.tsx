@@ -1,5 +1,5 @@
 'use client';
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { BotMessageSquare, User } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -11,6 +11,7 @@ import { ThinkingShimmer } from '@/components/ui/thinking-shimmer';
 import { WarmingProgress } from '@/components/ui/warming-progress';
 import { WarmingSuggestions } from '@/components/ui/warming-suggestions';
 import { WarmingStatus } from '@/lib/api/rag';
+import { toast } from 'sonner';
 
 // Lazy load heavy markdown processing components
 const ReactMarkdown = lazy(() => import('react-markdown'));
@@ -124,6 +125,15 @@ const MessageListComponent: React.FC<MessageListProps> = ({
   warmingStatus,
   onSuggestedPrompt,
 }) => {
+  // Display error as toast notification
+  useEffect(() => {
+    if (error) {
+      toast.error(error, {
+        duration: 5000,
+        description: 'Please check your connection and try again.',
+      });
+    }
+  }, [error]);
   const renderMessage = (msg: ChatMessage) => {
     if (msg.type === 'quiz' && msg.questionData) {
       return (
@@ -315,12 +325,7 @@ const MessageListComponent: React.FC<MessageListProps> = ({
         </div>
       )}
 
-      {/* Error display */}
-      {error && (
-        <div className="bg-red-100 text-red-700 rounded-lg p-3 mt-2">
-          Error: {error}
-        </div>
-      )}
+      {/* Error display removed - now using toast notifications */}
 
       {/* Scroll anchor */}
       <div ref={chatEndRef} />
