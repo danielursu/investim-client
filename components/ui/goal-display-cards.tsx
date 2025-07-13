@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ReactNode, useState, useEffect, useRef } from "react";
+import { ReactNode, useState, useEffect, useRef, useCallback } from "react";
 import { Plus } from "lucide-react";
 
 interface GoalDisplayCardProps {
@@ -123,22 +123,88 @@ interface GoalDisplayCardsProps {
 }
 
 export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProps) {
-  const [activeCardIndex, setActiveCardIndex] = useState<number | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const startX = useRef(0);
+  const isDragging = useRef(false);
+  
+  // Handle infinite scrolling with smooth transitions
+  const handleNext = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setSelectedIndex((prev) => (prev + 1) % goals.length);
+    setTimeout(() => setIsTransitioning(false), 500);
+  }, [goals.length, isTransitioning]);
+  
+  const handlePrev = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setSelectedIndex((prev) => (prev - 1 + goals.length) % goals.length);
+    setTimeout(() => setIsTransitioning(false), 500);
+  }, [goals.length, isTransitioning]);
 
-  // Handle click outside to collapse cards
+  // Touch/Mouse swipe handling with velocity detection
+  const handleStart = (clientX: number) => {
+    if (isTransitioning) return;
+    startX.current = clientX;
+    isDragging.current = true;
+  };
+
+  const handleEnd = (clientX: number) => {
+    if (!isDragging.current || isTransitioning) return;
+    
+    const diff = startX.current - clientX;
+    const threshold = 30; // reduced threshold for more responsive swiping
+    
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        handlePrev(); // Swipe left
+      } else {
+        handleNext(); // Swipe right
+      }
+    }
+    
+    isDragging.current = false;
+  };
+
+  // Keyboard navigation
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setActiveCardIndex(null);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        handlePrev();
+      } else if (e.key === 'ArrowRight') {
+        handleNext();
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, handlePrev]);
+
+  // Subtle hint animation
+  const [showHint, setShowHint] = useState(false);
+  
+  useEffect(() => {
+    // Hide hint after first interaction
+    if (selectedIndex !== 0) {
+      setShowHint(false);
+    }
+  }, [selectedIndex]);
+  
+  useEffect(() => {
+    // Only show hint once on initial mount
+    if (goals.length > 1) {
+      const timer = setTimeout(() => {
+        setShowHint(true);
+        // Auto-hide after animation completes
+        setTimeout(() => setShowHint(false), 3500);
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [goals.length]);
+
 
   if (goals.length === 0) {
     return (
@@ -148,59 +214,80 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
     );
   }
 
-  // For single goal, display without stacking
-  if (goals.length === 1) {
-    return (
-      <div className={cn("flex justify-center px-4", className)}>
-        <GoalDisplayCard {...goals[0]} />
-      </div>
-    );
-  }
-
-  // For multiple goals, create stacked effect - most prominent at bottom-right
-  // When there's an add card, we want it to be at the bottom-left (last position)
-  const hasAddCard = goals.some(g => g.isAddCard);
-  const regularGoals = goals.filter(g => !g.isAddCard);
-  const addCardGoal = goals.find(g => g.isAddCard);
-  
-  // Reorder goals to put add card last (will appear at bottom)
-  const orderedGoals = hasAddCard && addCardGoal ? [...regularGoals, addCardGoal] : goals;
+  // Reorder goals array based on selected index to show selected card in front
+  const orderedGoals = [...goals.slice(selectedIndex), ...goals.slice(0, selectedIndex)];
 
   return (
     <div 
       ref={containerRef}
-      className={cn("relative flex justify-end items-center opacity-100 animate-in fade-in-0 duration-700 min-h-[180px] overflow-visible pt-16 pr-8", className)}
+      className={cn("relative w-full", className)}
+      onMouseDown={(e) => handleStart(e.clientX)}
+      onMouseUp={(e) => handleEnd(e.clientX)}
+      onTouchStart={(e) => handleStart(e.touches[0].clientX)}
+      onTouchEnd={(e) => e.changedTouches[0] && handleEnd(e.changedTouches[0].clientX)}
     >
-      <div className="relative w-[320px] h-[160px]" style={{ right: '-65px' }}>
-        {orderedGoals.slice(0, 3).map((goal, index) => (
-          <div 
-            key={`goal-${index}`}
-            onClick={(e) => {
-              if (goal.isAddCard && goal.onClick) {
-                goal.onClick();
-              } else {
-                e.stopPropagation();
-                setActiveCardIndex(activeCardIndex === index ? null : index);
-              }
-            }}
-            className="absolute cursor-pointer"
-            style={{
-              transform: `translateX(${-index * 30}px) translateY(${-index * 40}px)`,
-              zIndex: 30 - (index * 10),
-            }}
-          >
-            <GoalDisplayCard 
-              {...goal} 
-              className={cn(
-                "transition-all duration-300",
-                index === 0 ? "" : index === 1 ? "opacity-98" : "opacity-95",
-                activeCardIndex === index ? "-translate-y-8" : "",
-                "hover:-translate-y-20"
-              )}
-            />
-          </div>
-        ))}
+      <div className="relative flex justify-end items-center min-h-[200px] overflow-visible pt-16 pr-8">
+        {/* Static stack of cards */}
+        <div className="relative w-[320px] h-[160px]" style={{ right: '-65px' }}>
+          {orderedGoals.slice(0, 3).map((goal, index) => (
+            <div
+              key={`goal-${goals.indexOf(goal)}`}
+              className="absolute smooth-card-transition"
+              style={{
+                transform: `translateX(${-index * 30}px) translateY(${-index * 40}px)`,
+                zIndex: 30 - (index * 10),
+                opacity: index === 0 ? 1 : index === 1 ? 0.98 : 0.95,
+              }}
+            >
+              <div className="relative">
+                <GoalDisplayCard 
+                  {...goal}
+                  onClick={index === 0 && goal.isAddCard ? goal.onClick : undefined}
+                  className={cn(
+                    "transition-all duration-300 ease-out",
+                    index === 0 ? "cursor-pointer" : "pointer-events-none",
+                    index === 1 && "hover:translate-x-1",
+                    index === 2 && "hover:translate-x-2"
+                  )}
+                />
+                
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+      
+      {/* Swipe hint above slider */}
+      {showHint && goals.length > 1 && (
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 pointer-events-none z-50">
+          <div className="animate-slide-finger">
+            <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
+              <span className="text-xl text-white">👆</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Minimalist infinite slider */}
+      {goals.length > 1 && (
+        <div className="mt-8 flex justify-center">
+          <div className="flex gap-1.5">
+            {goals.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedIndex(index)}
+                className={cn(
+                  "h-1.5 rounded-full smooth-dot-transition",
+                  selectedIndex === index 
+                    ? "w-8 bg-emerald-500" 
+                    : "w-1.5 bg-gray-300 hover:bg-gray-400"
+                )}
+                aria-label={`View goal ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
