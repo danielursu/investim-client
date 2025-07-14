@@ -182,28 +182,44 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleNext, handlePrev]);
 
-  // Subtle hint animation - only show once per session
+  // Subtle hint animation - only show once per session, persisted globally
   const [showHint, setShowHint] = useState(false);
-  const [hasShownHint, setHasShownHint] = useState(false);
+  const [hasShownHint, setHasShownHint] = useState(() => {
+    // Check localStorage to see if hint was already shown
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('goalCardsHintShown') === 'true';
+    }
+    return false;
+  });
   
   useEffect(() => {
     // Hide hint after first interaction
     if (selectedIndex !== 0) {
       setShowHint(false);
       setHasShownHint(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('goalCardsHintShown', 'true');
+      }
     }
   }, [selectedIndex]);
   
   useEffect(() => {
     // Only show hint once on initial mount and never again
-    if (goals.length > 1 && !hasShownHint) {
+    // Also check if we're in a visible state (not hidden by chat)
+    if (goals.length > 1 && !hasShownHint && document.visibilityState === 'visible') {
       const timer = setTimeout(() => {
-        setShowHint(true);
-        // Auto-hide after animation completes
-        setTimeout(() => {
-          setShowHint(false);
-          setHasShownHint(true);
-        }, 3500);
+        // Double-check we're still visible and not in chat mode
+        if (document.visibilityState === 'visible' && !document.querySelector('[data-chat-active="true"]')) {
+          setShowHint(true);
+          // Auto-hide after animation completes
+          setTimeout(() => {
+            setShowHint(false);
+            setHasShownHint(true);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('goalCardsHintShown', 'true');
+            }
+          }, 3500);
+        }
       }, 1500);
       
       return () => clearTimeout(timer);

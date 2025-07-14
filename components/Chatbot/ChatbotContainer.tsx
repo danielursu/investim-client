@@ -254,9 +254,12 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
   if (!shouldRender) return null;
 
   return (
-    <div className={`fixed inset-0 bg-white flex flex-col z-40 font-inter transform transition-transform duration-300 ${
-      isClosing ? 'animate-slide-down' : 'animate-slide-up'
-    }`}>
+    <div 
+      className={`fixed inset-0 bg-white flex flex-col z-40 font-inter transform transition-transform duration-300 ${
+        isClosing ? 'animate-slide-down' : 'animate-slide-up'
+      }`}
+      data-chat-active="true"
+    >
       <ChatHeader onClose={handleClose} />
       
       <MessageList
