@@ -291,7 +291,7 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
       
       {/* Minimalist infinite slider */}
       {goals.length > 1 && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-4 flex justify-center">
           <div className="flex gap-1.5">
             {goals.map((_, index) => (
               <button
