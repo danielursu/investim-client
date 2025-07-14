@@ -234,7 +234,7 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
               key={`goal-${goals.indexOf(goal)}`}
               className="absolute smooth-card-transition"
               style={{
-                transform: `translateX(${-index * 25}px) translateY(${-index * 35 + 15}px)`,
+                transform: `translateX(${-index * 25}px) translateY(${-index * 35 + 20}px)`,
                 zIndex: 30 - (index * 10),
                 opacity: index === 0 ? 1 : index === 1 ? 0.98 : 0.95,
               }}
