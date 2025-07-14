@@ -59,7 +59,7 @@ export default function InvestimClient() {
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-x-hidden">
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden pb-16">
+      <div className={`flex-1 overflow-y-auto overflow-x-hidden pb-16 ${activeTab === "chat" ? "opacity-0" : "opacity-100"} transition-opacity duration-300`}>
         <UserHeader />
         
         {/* Mobile-Only Single Column Layout */}

@@ -35,10 +35,10 @@ export const ChatInterface = ({ open, onClose }: ChatInterfaceProps) => {
   // Update shouldRender when chat finishes closing
   useEffect(() => {
     if (!open && shouldRender) {
-      // Wait for the closing animation to complete
+      // Wait for the closing animation to complete + small buffer
       const timer = setTimeout(() => {
         setShouldRender(false);
-      }, 300); // Match animation duration
+      }, 350); // Animation duration + 50ms buffer to prevent flicker
       return () => clearTimeout(timer);
     }
   }, [open, shouldRender]);

@@ -259,6 +259,12 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
         isClosing ? 'animate-slide-down' : 'animate-slide-up'
       }`}
       data-chat-active="true"
+      style={{
+        // Ensure solid background during closing animation
+        backgroundColor: isClosing ? 'white' : undefined,
+        // Prevent any potential flicker by ensuring we're always on top during close
+        zIndex: isClosing ? 50 : 40
+      }}
     >
       <ChatHeader onClose={handleClose} />
       
