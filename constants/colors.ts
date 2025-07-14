@@ -23,9 +23,11 @@ export const COLORS = {
   },
   
   // Performance indicators
-  POSITIVE: '#10b981',  // Green for gains
-  NEGATIVE: '#ef4444',  // Red for losses
-  NEUTRAL: '#6b7280',   // Gray for neutral
+  POSITIVE: '#059669',  // Emerald-600 for gains (better contrast)
+  POSITIVE_LIGHT: '#10b981',  // Emerald-500 for lighter contexts
+  NEGATIVE: '#dc2626',  // Red-600 for losses (better contrast)
+  NEGATIVE_LIGHT: '#ef4444',  // Red-500 for lighter contexts
+  NEUTRAL: '#6b7280',   // Gray-500 for neutral
   
   // UI colors
   BACKGROUND: '#f9fafb',  // Gray-50

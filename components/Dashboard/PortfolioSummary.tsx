@@ -32,56 +32,47 @@ export const PortfolioSummary = () => {
   const TrendIcon = isPositiveGain ? TrendingUp : TrendingDown;
   const gainText = isPositiveGain ? `+$${gain.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : `-$${Math.abs(gain).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  // Risk badge styling
-  const getRiskBadgeStyle = (profile: string | null) => {
-    switch (profile) {
-      case 'Conservative':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Moderate':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Aggressive':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-600 border-gray-200';
-    }
-  };
-
   return (
     <div className="px-4 pt-6 pb-2">
       <Card
-        className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg rounded-2xl border-none transition-shadow duration-200 hover:shadow-xl"
+        className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg rounded-2xl border-none"
         aria-label="Total Portfolio Value Card"
       >
-        <CardHeader className="pb-1 pt-4">
+        <CardHeader className="pb-3 pt-5">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium text-white/90">
               Total Portfolio Value
             </CardTitle>
-            {mounted && riskProfile && riskScore && (
+            {mounted && riskProfile && (
               <span 
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30"
-                title={`Risk Level: ${riskProfile} (${riskScore}/9)`}
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white"
+                title={`Risk Level: ${riskProfile}${riskScore ? ` (${riskScore}/9)` : ''}`}
               >
                 {riskProfile}
               </span>
             )}
           </div>
         </CardHeader>
-        <CardContent className="pt-0 pb-4">
-          <div className="flex flex-col">
+        
+        <CardContent className="pt-0 pb-5">
+          <div className="space-y-3">
+            {/* Main Portfolio Value */}
             <span
-              className="text-3xl font-semibold text-white tracking-tight"
+              className="text-3xl font-bold text-white tracking-tight block"
               aria-label="Portfolio Value"
             >
               ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
-            <div className="flex items-center justify-between mt-2">
+            
+            {/* Performance Metrics */}
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <TrendIcon className={`h-4 w-4 ${isPositiveGain ? 'text-white' : 'text-red-200'}`} aria-hidden="true" />
-                <span className={`text-sm font-medium ${isPositiveGain ? 'text-white' : 'text-red-200'}`} aria-label="Portfolio Growth">
+                <TrendIcon className={`h-4 w-4 ${isPositiveGain ? 'text-white' : 'text-red-200'}`} />
+                <span className={`text-sm font-medium ${isPositiveGain ? 'text-white' : 'text-red-200'}`}>
                   {gainText} ({isPositiveGain ? '+' : ''}{gainPercentage.toFixed(1)}%)
                 </span>
               </div>
+              
               {mounted && lastUpdated && (
                 <div className="flex items-center gap-1">
                   <RefreshCw className="h-3 w-3 text-white/60" />
