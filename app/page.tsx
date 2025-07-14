@@ -30,16 +30,24 @@ export default function InvestimClient() {
   const [previousTab, setPreviousTab] = useState<"home" | "invest" | "goals" | "settings">("home");
   
   const handleTabChange = useCallback((tab: "home" | "invest" | "chat" | "goals" | "settings") => {
-    if (tab === "chat" && activeTab === "chat") {
-      // Toggle off - return to previous tab
-      setActiveTab(previousTab);
-    } else if (tab === "chat") {
-      // Opening chat - save current tab as previous
-      setPreviousTab(activeTab === "chat" ? previousTab : activeTab as "home" | "invest" | "goals" | "settings");
-      setActiveTab("chat");
+    if (tab === "chat") {
+      if (activeTab === "chat") {
+        // Already in chat - toggle off to previous tab
+        setActiveTab(previousTab);
+      } else {
+        // Opening chat - save current tab as previous
+        setPreviousTab(activeTab as "home" | "invest" | "goals" | "settings");
+        setActiveTab("chat");
+      }
     } else {
-      // Normal navigation
-      setPreviousTab(activeTab === "chat" ? previousTab : activeTab as "home" | "invest" | "goals" | "settings");
+      // Normal navigation to non-chat tab
+      if (activeTab === "chat") {
+        // Coming from chat - don't update previousTab
+        setPreviousTab(previousTab);
+      } else {
+        // Normal tab switching - update previousTab only if not coming from chat
+        setPreviousTab(activeTab as "home" | "invest" | "goals" | "settings");
+      }
       setActiveTab(tab);
     }
   }, [activeTab, previousTab]);
