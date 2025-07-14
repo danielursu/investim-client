@@ -182,28 +182,33 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleNext, handlePrev]);
 
-  // Subtle hint animation
+  // Subtle hint animation - only show once per session
   const [showHint, setShowHint] = useState(false);
+  const [hasShownHint, setHasShownHint] = useState(false);
   
   useEffect(() => {
     // Hide hint after first interaction
     if (selectedIndex !== 0) {
       setShowHint(false);
+      setHasShownHint(true);
     }
   }, [selectedIndex]);
   
   useEffect(() => {
-    // Only show hint once on initial mount
-    if (goals.length > 1) {
+    // Only show hint once on initial mount and never again
+    if (goals.length > 1 && !hasShownHint) {
       const timer = setTimeout(() => {
         setShowHint(true);
         // Auto-hide after animation completes
-        setTimeout(() => setShowHint(false), 3500);
+        setTimeout(() => {
+          setShowHint(false);
+          setHasShownHint(true);
+        }, 3500);
       }, 1500);
       
       return () => clearTimeout(timer);
     }
-  }, [goals.length]);
+  }, [goals.length, hasShownHint]);
 
 
   if (goals.length === 0) {
