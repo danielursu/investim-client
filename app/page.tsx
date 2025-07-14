@@ -49,9 +49,9 @@ export default function InvestimClient() {
   }, [previousTab]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50 overflow-x-hidden">
       {/* Main Content */}
-      <div className="flex-1 overflow-auto pb-16">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pb-16">
         <UserHeader />
         
         {/* Mobile-Only Single Column Layout */}

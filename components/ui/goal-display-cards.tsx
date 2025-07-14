@@ -54,7 +54,7 @@ function GoalDisplayCard({
       <div
         onClick={onClick}
         className={cn(
-          "relative flex h-32 w-[280px] sm:w-[320px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-dashed border-emerald-400/70 bg-emerald-50/80 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-emerald-500 cursor-pointer overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2 shadow-lg shadow-emerald-100/50",
+          "relative flex h-28 w-[260px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-dashed border-emerald-400/70 bg-emerald-50/80 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-emerald-500 cursor-pointer overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2 shadow-lg shadow-emerald-100/50",
           className
         )}
       >
@@ -78,7 +78,7 @@ function GoalDisplayCard({
   return (
     <div
       className={cn(
-        "relative flex h-32 w-[280px] sm:w-[320px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-gray-200 bg-white/90 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-gray-300 hover:bg-white overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2",
+        "relative flex h-28 w-[260px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-gray-200 bg-white/90 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-gray-300 hover:bg-white overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2",
         className
       )}
     >
@@ -220,21 +220,21 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
   return (
     <div 
       ref={containerRef}
-      className={cn("relative w-full", className)}
+      className={cn("relative w-full overflow-x-hidden", className)}
       onMouseDown={(e) => handleStart(e.clientX)}
       onMouseUp={(e) => handleEnd(e.clientX)}
       onTouchStart={(e) => handleStart(e.touches[0].clientX)}
       onTouchEnd={(e) => e.changedTouches[0] && handleEnd(e.changedTouches[0].clientX)}
     >
-      <div className="relative flex justify-end items-center min-h-[200px] overflow-visible pt-16 pr-8">
+      <div className="relative flex justify-end items-center min-h-[225px] overflow-x-hidden overflow-y-visible pt-18 pr-8">
         {/* Static stack of cards */}
-        <div className="relative w-[320px] h-[160px]" style={{ right: '-65px' }}>
+        <div className="relative w-[360px] h-[90px]" style={{ right: '-75px' }}>
           {orderedGoals.slice(0, 3).map((goal, index) => (
             <div
               key={`goal-${goals.indexOf(goal)}`}
               className="absolute smooth-card-transition"
               style={{
-                transform: `translateX(${-index * 30}px) translateY(${-index * 40}px)`,
+                transform: `translateX(${-index * 22}px) translateY(${-index * 30 + 15}px)`,
                 zIndex: 30 - (index * 10),
                 opacity: index === 0 ? 1 : index === 1 ? 0.98 : 0.95,
               }}

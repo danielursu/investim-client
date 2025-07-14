@@ -22,7 +22,7 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
       </head>
-      <body>
+      <body className="overflow-x-hidden">
         <ErrorBoundary>
           <ThemeProvider 
             attribute="class" 

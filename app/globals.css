@@ -4,8 +4,31 @@
 
 @import 'katex/dist/katex.min.css';
 
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
+  position: relative;
+}
+
+* {
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;
+  max-width: 100vw;
+}
+
+#__next {
+  overflow-x: hidden;
 }
 
 @layer utilities {
@@ -32,18 +55,18 @@ body {
   
   @keyframes slide-finger {
     0% {
-      transform: translateX(-60px);
+      transform: translateX(-30px);
       opacity: 0;
     }
     20% {
       opacity: 1;
     }
     80% {
-      transform: translateX(60px);
+      transform: translateX(30px);
       opacity: 1;
     }
     100% {
-      transform: translateX(60px);
+      transform: translateX(30px);
       opacity: 0;
     }
   }

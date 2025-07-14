@@ -52,3 +52,4 @@ Thumbs.db
 
 # Claude sessions (private)
 .claude/
+logs/
