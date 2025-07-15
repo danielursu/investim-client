@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, BotMessageSquare } from 'lucide-react';
 
 export interface ChatHeaderProps {
   onClose: () => void;
@@ -14,9 +14,13 @@ export interface ChatHeaderProps {
 const ChatHeaderComponent: React.FC<ChatHeaderProps> = ({ onClose }) => {
   return (
     <div className="border-b border-gray-200 bg-white">
-      <div className="px-6 py-4">
+      <div className="px-6 py-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-gray-900">AI Assistant</h3>
+          <div></div>
+          <div className="flex items-center gap-2">
+            <BotMessageSquare className="h-5 w-5 text-emerald-600" />
+            <h3 className="text-base font-medium text-gray-900">AI Assistant</h3>
+          </div>
           <Button 
             variant="ghost" 
             size="icon" 
