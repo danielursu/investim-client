@@ -8,9 +8,6 @@ export { ChatbotContainer } from './ChatbotContainer';
 export type { ChatbotContainerProps } from './ChatbotContainer';
 
 // Individual components
-export { ChatHeader } from './ChatHeader';
-export type { ChatHeaderProps } from './ChatHeader';
-
 export { MessageList } from './MessageList';
 export type { MessageListProps } from './MessageList';
 

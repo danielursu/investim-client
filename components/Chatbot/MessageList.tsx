@@ -25,12 +25,15 @@ const TextFallback = ({ content }: { content: string }) => (
   </div>
 );
 
-// Simple text processing that preserves original RAG API structure
+// Enhanced text processing that emphasizes important investment concepts
 const processInvestmentContent = (content: string): string => {
-  // Minimal processing - just clean up formatting while preserving structure
+  // Enhanced processing - emphasize key investment terms and strategies
   let processedContent = content
-    // Only add emphasis to key investment terms for readability
-    .replace(/\b(ETF|ETFs|Exchange-Traded Funds?|diversification|portfolio|asset allocation|expense ratio|liquidity|transparency|risk tolerance|investment strategy)\b/gi, '**$1**')
+    // Emphasize key investment terms and concepts for better readability
+    .replace(/\b(ETF|ETFs|Exchange-Traded Funds?|diversification|portfolio|asset allocation|expense ratio|liquidity|transparency|risk tolerance|investment strategy|market volatility|compound interest|dividend|yield|growth|value|index fund|mutual fund|bonds|stocks|securities|emergency fund|retirement|401k|IRA|Roth IRA|financial goals|time horizon|inflation)\b/gi, '**$1**')
+    
+    // Emphasize important financial concepts and advice
+    .replace(/\b(start investing|dollar-cost averaging|long-term|short-term|high-risk|low-risk|moderate risk|conservative|aggressive|balanced|rebalancing)\b/gi, '**$1**')
     
     // Preserve original bullet points and numbers exactly as they come from RAG
     // Just ensure consistent markdown formatting
@@ -111,18 +114,18 @@ const LazyMarkdownRenderer = ({ content, isUser = false }: { content: string; is
           
           // Simple paragraph styling with ultra-tight spacing
           p: ({ node, ...props }) => (
-            <p {...props} className={`text-sm leading-normal mb-2 last:mb-0 ${isUser ? 'text-white' : 'text-muted-foreground'}`} />
+            <p {...props} className={`text-sm leading-normal mb-2 last:mb-0 ${isUser ? 'text-white' : 'text-gray-900'}`} />
           ),
           
-          // Minimal emphasis for key terms
+          // Enhanced emphasis for key terms
           strong: ({ node, ...props }) => {
             const text = props.children?.toString() || '';
             // Special styling for bullet point headers
             if (text.startsWith('•')) {
-              return <strong {...props} className={`font-semibold block mb-1 ${isUser ? 'text-white' : 'text-foreground'}`} />;
+              return <strong {...props} className={`font-bold block mb-1 ${isUser ? 'text-white' : 'text-gray-900'}`} />;
             }
-            // Subtle emphasis
-            return <strong {...props} className={`font-medium ${isUser ? 'text-white' : 'text-foreground'}`} />;
+            // Strong emphasis for important content
+            return <strong {...props} className={`font-semibold ${isUser ? 'text-white' : 'text-gray-900'}`} />;
           },
           
           // Simple blockquote styling with ultra-tight spacing
@@ -184,7 +187,7 @@ const LazyMarkdownRenderer = ({ content, isUser = false }: { content: string; is
           li: ({ node, ...props }) => {
             const { ordered, ...cleanProps } = props;
             return (
-              <li {...cleanProps} className={`leading-normal pl-2 ${isUser ? 'text-white marker:text-white/70' : 'text-muted-foreground marker:text-foreground/70'}`} />
+              <li {...cleanProps} className={`leading-normal pl-2 ${isUser ? 'text-white marker:text-white/70' : 'text-gray-900 marker:text-gray-700'}`} />
             );
           },
           

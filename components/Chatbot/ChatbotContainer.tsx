@@ -2,7 +2,6 @@
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { useRiskQuiz } from '@/hooks/useRiskQuiz';
 import { useChatAPI } from '@/hooks/useChatAPI';
-import { ChatHeader } from './ChatHeader';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import { ChatMessage } from '@/types';
@@ -222,14 +221,6 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
     return 'Type your message...';
   }, [isQuizActive]);
 
-  // Handle close with store update but preserve messages in localStorage
-  const handleClose = useCallback(() => {
-    setIsOpen(false);
-    // Don't clear messages - let them persist for better UX
-    // Only clear if user explicitly wants a fresh start
-    setPendingPrompt(null); // Clear any pending prompt
-    onClose();
-  }, [onClose, setIsOpen]);
 
   // Handle suggested prompt selection during warming
   const handleSuggestedPrompt = useCallback((prompt: string) => {
@@ -266,8 +257,6 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
         zIndex: isClosing ? 50 : 40
       }}
     >
-      <ChatHeader onClose={handleClose} />
-      
       <MessageList
         messages={messages}
         loading={loading}
