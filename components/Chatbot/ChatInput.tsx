@@ -125,14 +125,14 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
       )}
 
 
-      {/* Enhanced Input Form */}
-      <div className="border-t border-gray-200 bg-white">
+      {/* Modern Input Form */}
+      <div className="bg-gray-50 px-3 pb-6">
         <form onSubmit={handleSubmit}>
-          <div className="flex items-center px-6 py-4 gap-3 relative">
+          <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 gap-3 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100 transition-all duration-200">
             <input
               type="text"
               placeholder={placeholder}
-              className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500 transition-all duration-200 focus:placeholder-gray-400"
+              className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -140,22 +140,22 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
               autoFocus
               aria-label="Type your message"
             />
-              <Button
-                size="icon"
-                className={`h-8 w-8 rounded-lg transition-all duration-200 disabled:opacity-50 ${
-                  inputValue.trim() && !disabled && !loading
-                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm hover:shadow-md transform hover:scale-105'
-                    : 'bg-transparent hover:bg-accent text-muted-foreground hover:text-accent-foreground'
-                }`}
-                type="submit"
-                disabled={loading || !inputValue.trim() || disabled}
-                aria-label="Send message"
-              >
-                {loading ? <LoadingSpinner /> : <SendIcon />}
-              </Button>
-            </div>
-          </form>
-        </div>
+            <Button
+              size="icon"
+              className={`h-8 w-8 rounded-lg transition-all duration-200 disabled:opacity-50 ${
+                inputValue.trim() && !disabled && !loading
+                  ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm hover:shadow-md'
+                  : 'bg-transparent hover:bg-gray-200 text-gray-400 hover:text-gray-600'
+              }`}
+              type="submit"
+              disabled={loading || !inputValue.trim() || disabled}
+              aria-label="Send message"
+            >
+              {loading ? <LoadingSpinner /> : <SendIcon />}
+            </Button>
+          </div>
+        </form>
+      </div>
       </div>
   );
 };

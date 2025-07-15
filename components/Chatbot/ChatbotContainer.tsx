@@ -279,7 +279,7 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
         onSuggestedPrompt={handleSuggestedPrompt}
       />
       
-      <div className="pb-24">
+      <div className="pb-16">
         <ChatInput
           onSendMessage={handleSendMessage}
           disabled={isQuizActive}
