@@ -255,13 +255,13 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
 
   return (
     <div 
-      className={`fixed inset-0 bg-white flex flex-col z-40 font-inter transform transition-transform duration-300 ${
+      className={`fixed inset-0 bg-gray-50 flex flex-col z-40 font-inter transform transition-transform duration-300 ${
         isClosing ? 'animate-slide-down' : 'animate-slide-up'
       }`}
       data-chat-active="true"
       style={{
         // Ensure solid background during closing animation
-        backgroundColor: isClosing ? 'white' : undefined,
+        backgroundColor: isClosing ? '#f9fafb' : undefined,
         // Prevent any potential flicker by ensuring we're always on top during close
         zIndex: isClosing ? 50 : 40
       }}
@@ -272,7 +272,6 @@ export const ChatbotContainer: React.FC<ChatbotContainerProps> = ({
         messages={messages}
         loading={loading}
         error={error || ''}
-        userAvatarUrl={userAvatarUrl}
         chatEndRef={chatEndRef}
         onAnswerSelect={onQuizAnswerSelect}
         isWarmingUp={isWarmingUp}

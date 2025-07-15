@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { promptSuggestions } from '@/data/promptSuggestions';
 
 export interface ChatInputProps {
@@ -66,7 +67,7 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
 
   const LoadingSpinner = () => (
     <svg 
-      className="animate-spin h-4 w-4 text-white" 
+      className="animate-spin h-4 w-4 text-muted-foreground" 
       viewBox="0 0 24 24"
       aria-label="Loading"
     >
@@ -99,51 +100,63 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
   );
 
   return (
-    <div className="border-t border-gray-100 bg-white">
-      {/* Prompt Suggestions */}
+    <div className="bg-gray-50">
+      {/* Enhanced Prompt Suggestions */}
       {showSuggestions && (
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-            {filteredSuggestions.slice(0, 10).map(suggestion => (
-              <button
+        <div className="px-6 py-5 border-t border-gray-200 bg-gray-100/50">
+          <div className="mb-3">
+            <span className="text-xs font-medium text-muted-foreground tracking-wide uppercase">
+              Suggested Questions
+            </span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide">
+            {filteredSuggestions.slice(0, 5).map(suggestion => (
+              <Badge
                 key={suggestion.id}
+                variant="outline"
+                className="cursor-pointer hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-200 whitespace-nowrap text-xs py-2 px-4 rounded-full shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                 onClick={() => handleSuggestionClick(suggestion.text)}
-                className="inline-flex items-center px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 bg-transparent hover:bg-gray-50 rounded-full whitespace-nowrap transition-all border border-gray-200 hover:border-gray-300"
               >
                 {suggestion.text}
-              </button>
+              </Badge>
             ))}
           </div>
         </div>
       )}
 
 
-      {/* Input Form */}
-      <form className="p-4 pb-safe" onSubmit={handleSubmit}>
-        <div className="flex items-center bg-gray-50 rounded-full px-5 py-4 transition-all duration-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500 focus-within:shadow-md">
-          <input
-            type="text"
-            placeholder={placeholder}
-            className="flex-1 bg-transparent outline-none text-base text-gray-900 placeholder-gray-400 min-h-[24px]"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={disabled}
-            autoFocus
-            aria-label="Type your message"
-          />
-          <Button
-            size="icon"
-            className="h-10 w-10 rounded-full bg-emerald-600 hover:bg-emerald-700 ml-3 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-            type="submit"
-            disabled={loading || !inputValue.trim() || disabled}
-            aria-label="Send message"
-          >
-            {loading ? <LoadingSpinner /> : <SendIcon />}
-          </Button>
+      {/* Enhanced Input Form */}
+      <div className="border-t border-gray-200 bg-white">
+        <form onSubmit={handleSubmit}>
+          <div className="flex items-center px-6 py-4 gap-3 relative">
+            <input
+              type="text"
+              placeholder={placeholder}
+              className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500 transition-all duration-200 focus:placeholder-gray-400"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={disabled}
+              autoFocus
+              aria-label="Type your message"
+            />
+              <Button
+                size="icon"
+                className={`h-8 w-8 rounded-lg transition-all duration-200 disabled:opacity-50 ${
+                  inputValue.trim() && !disabled && !loading
+                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm hover:shadow-md transform hover:scale-105'
+                    : 'bg-transparent hover:bg-accent text-muted-foreground hover:text-accent-foreground'
+                }`}
+                type="submit"
+                disabled={loading || !inputValue.trim() || disabled}
+                aria-label="Send message"
+              >
+                {loading ? <LoadingSpinner /> : <SendIcon />}
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
+      </div>
   );
 };
 

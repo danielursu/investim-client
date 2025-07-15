@@ -1,8 +1,9 @@
 'use client';
 import React, { Suspense, lazy, useEffect } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { BotMessageSquare, User } from 'lucide-react';
+import { FileText, BarChart3, BookOpen, Target, Lightbulb, FileSearch } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { RiskQuizQuestion } from '@/components/RiskQuizQuestion';
 import { AssetAllocationChart } from '@/components/ui/AssetAllocationChart';
 import { sanitizeMarkdown, sanitizeSourceContent } from '@/lib/sanitize';
@@ -12,19 +13,40 @@ import { WarmingProgress } from '@/components/ui/warming-progress';
 import { WarmingSuggestions } from '@/components/ui/warming-suggestions';
 import { WarmingStatus } from '@/lib/api/rag';
 import { toast } from 'sonner';
+import { CodeBlock } from '@/components/ui/code-block';
 
 // Lazy load heavy markdown processing components
 const ReactMarkdown = lazy(() => import('react-markdown'));
 
 // Simple text fallback for when markdown is loading
 const TextFallback = ({ content }: { content: string }) => (
-  <div className="text-sm whitespace-pre-wrap break-words">
+  <div className="text-sm whitespace-pre-wrap break-words leading-relaxed">
     {content}
   </div>
 );
 
+// Simple text processing that preserves original RAG API structure
+const processInvestmentContent = (content: string): string => {
+  // Minimal processing - just clean up formatting while preserving structure
+  let processedContent = content
+    // Only add emphasis to key investment terms for readability
+    .replace(/\b(ETF|ETFs|Exchange-Traded Funds?|diversification|portfolio|asset allocation|expense ratio|liquidity|transparency|risk tolerance|investment strategy)\b/gi, '**$1**')
+    
+    // Preserve original bullet points and numbers exactly as they come from RAG
+    // Just ensure consistent markdown formatting
+    .replace(/^\* /gm, '- ')  // Convert * to - for consistency
+    .replace(/^• /gm, '- ')   // Convert • to - for consistency
+    
+    // Clean up excessive spacing
+    .replace(/\n\n\n+/g, '\n\n')
+    .replace(/  +/g, ' ')
+    .trim();
+  
+  return processedContent;
+};
+
 // Lazy markdown renderer that dynamically imports plugins
-const LazyMarkdownRenderer = ({ content }: { content: string }) => {
+const LazyMarkdownRenderer = ({ content, isUser = false }: { content: string; isUser?: boolean }) => {
   const [plugins, setPlugins] = React.useState<any>({ gfm: null, math: null, katex: null });
   
   React.useEffect(() => {
@@ -67,25 +89,124 @@ const LazyMarkdownRenderer = ({ content }: { content: string }) => {
         remarkPlugins={[plugins.gfm, plugins.math]}
         rehypePlugins={[plugins.katex]}
         components={{
+          // Simple, clean typography hierarchy with ultra-tight spacing
+          h1: ({ node, ...props }) => (
+            <h1 {...props} className="text-lg font-semibold text-foreground mt-4 mb-2 first:mt-0" />
+          ),
+          h2: ({ node, ...props }) => (
+            <h2 {...props} className="text-base font-semibold text-foreground mt-4 mb-2 first:mt-0" />
+          ),
+          h3: ({ node, ...props }) => (
+            <h3 {...props} className="text-sm font-medium text-foreground mt-3 mb-1 first:mt-0" />
+          ),
+          h4: ({ node, ...props }) => (
+            <h4 {...props} className="text-sm font-medium text-gray-800 mt-3 mb-1 first:mt-0" />
+          ),
+          h5: ({ node, ...props }) => (
+            <h5 {...props} className="text-sm font-medium text-gray-700 mt-2 mb-1 first:mt-0" />
+          ),
+          h6: ({ node, ...props }) => (
+            <h6 {...props} className="text-xs font-medium text-gray-700 mt-2 mb-1 first:mt-0" />
+          ),
+          
+          // Simple paragraph styling with ultra-tight spacing
+          p: ({ node, ...props }) => (
+            <p {...props} className={`text-sm leading-normal mb-2 last:mb-0 ${isUser ? 'text-white' : 'text-muted-foreground'}`} />
+          ),
+          
+          // Minimal emphasis for key terms
+          strong: ({ node, ...props }) => {
+            const text = props.children?.toString() || '';
+            // Special styling for bullet point headers
+            if (text.startsWith('•')) {
+              return <strong {...props} className={`font-semibold block mb-1 ${isUser ? 'text-white' : 'text-foreground'}`} />;
+            }
+            // Subtle emphasis
+            return <strong {...props} className={`font-medium ${isUser ? 'text-white' : 'text-foreground'}`} />;
+          },
+          
+          // Simple blockquote styling with ultra-tight spacing
+          blockquote: ({ node, ...props }) => (
+            <blockquote className="border-l-2 border-border pl-4 my-2 text-sm text-muted-foreground italic">
+              {props.children}
+            </blockquote>
+          ),
+          
+          // Links with better styling
           a: ({ node, ...props }) => (
             <a 
               {...props} 
-              className="text-emerald-600 underline" 
+              className="text-emerald-600 hover:text-emerald-700 underline decoration-emerald-300 hover:decoration-emerald-500 transition-colors" 
               target="_blank" 
               rel="noopener noreferrer" 
             />
           ),
-          code: ({ node, ...props }) => (
-            <code 
-              {...props} 
-              className="bg-gray-100 rounded px-1 text-[13px]" 
-            />
+          
+          // Code blocks using our enhanced CodeBlock component
+          pre: ({ node, ...props }) => {
+            const child = React.Children.toArray(props.children)[0];
+            if (React.isValidElement(child) && child.props.className) {
+              const language = child.props.className.replace('language-', '');
+              return (
+                <CodeBlock language={language}>
+                  {child.props.children}
+                </CodeBlock>
+              );
+            }
+            return <CodeBlock>{props.children}</CodeBlock>;
+          },
+          
+          // Inline code with better styling
+          code: ({ node, inline, ...props }) => {
+            if (inline) {
+              return (
+                <CodeBlock inline>
+                  {props.children}
+                </CodeBlock>
+              );
+            }
+            return <code {...props} />;
+          },
+          
+          // Simple, clean list styling with ultra-tight spacing
+          ul: ({ node, ...props }) => {
+            const { ordered, ...cleanProps } = props;
+            return (
+              <ul {...cleanProps} className="list-disc ml-8 pl-4 space-y-0.5 mb-2 text-sm" />
+            );
+          },
+          ol: ({ node, ...props }) => {
+            const { ordered, ...cleanProps } = props;
+            return (
+              <ol {...cleanProps} className="list-decimal ml-8 pl-4 space-y-0.5 mb-2 text-sm" />
+            );
+          },
+          li: ({ node, ...props }) => {
+            const { ordered, ...cleanProps } = props;
+            return (
+              <li {...cleanProps} className={`leading-normal pl-2 ${isUser ? 'text-white marker:text-white/70' : 'text-muted-foreground marker:text-foreground/70'}`} />
+            );
+          },
+          
+          // Horizontal rule for section breaks
+          hr: ({ node, ...props }) => (
+            <hr {...props} className="my-6 border-border" />
           ),
-          ul: ({ node, ...props }) => (
-            <ul {...props} className="list-disc ml-5" />
+          
+          // Tables with better styling
+          table: ({ node, ...props }) => (
+            <div className="overflow-x-auto my-3">
+              <table {...props} className="min-w-full divide-y divide-gray-200 text-sm" />
+            </div>
           ),
-          ol: ({ node, ...props }) => (
-            <ol {...props} className="list-decimal ml-5" />
+          thead: ({ node, ...props }) => (
+            <thead {...props} className="bg-gray-50" />
+          ),
+          th: ({ node, ...props }) => (
+            <th {...props} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" />
+          ),
+          td: ({ node, ...props }) => (
+            <td {...props} className="px-3 py-2 text-sm text-gray-800 border-b border-gray-100" />
           ),
         }}
       >
@@ -102,7 +223,6 @@ export interface MessageListProps {
   messages: ChatMessage[];
   loading: boolean;
   error: string;
-  userAvatarUrl?: string;
   chatEndRef: React.RefObject<HTMLDivElement>;
   onAnswerSelect: (questionId: number, answerValue: string) => void;
   isWarmingUp?: boolean;
@@ -118,7 +238,6 @@ const MessageListComponent: React.FC<MessageListProps> = ({
   messages,
   loading,
   error,
-  userAvatarUrl,
   chatEndRef,
   onAnswerSelect,
   isWarmingUp = false,
@@ -145,96 +264,109 @@ const MessageListComponent: React.FC<MessageListProps> = ({
     }
 
     return (
-      <div
-        className={`rounded-2xl px-4 py-3 max-w-[85%] shadow-sm text-sm ${
+      <div className={`${
+        msg.role === 'user' 
+          ? 'ml-12 flex justify-end' 
+          : 'flex justify-start'
+      }`}>
+        <div className={`${
           msg.role === 'user' 
-            ? 'bg-emerald-600 text-white' 
-            : 'bg-gray-50 text-gray-900 border border-gray-100'
-        } font-inter prose prose-sm max-w-none break-words animate-scale-in`}
-      >
+            ? 'bg-emerald-500 text-white rounded-2xl rounded-tr-md max-w-[80%]' 
+            : 'bg-gray-100 text-gray-900 rounded-2xl rounded-tl-md w-full'
+        } px-4 py-3 transition-all duration-200`}>
         <Suspense fallback={<TextFallback content={sanitizeMarkdown(msg.content)} />}>
-          <LazyMarkdownRenderer content={sanitizeMarkdown(msg.content)} />
+          <LazyMarkdownRenderer 
+            content={processInvestmentContent(sanitizeMarkdown(msg.content))} 
+            isUser={msg.role === 'user'}
+          />
         </Suspense>
 
         {/* Enhanced Sources section */}
         {msg.sources && msg.sources.length > 0 && (
-          <Collapsible className="mt-3">
-            <CollapsibleTrigger className="flex items-center gap-1 text-xs text-emerald-700 hover:text-emerald-800 font-medium">
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Sources ({msg.sources.length})
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-2">
-              <div className="space-y-2">
-                {msg.sources.map((src, i) => {
-                  // Extract clean metadata
-                  const metadata = src.metadata || {};
-                  const source = (metadata.source as string) || 'Unknown Document';
-                  const pageNum = (metadata.page_num as number) || (metadata.page as number);
-                  const documentTitle = source.includes('/') ? source.split('/').pop() : source;
-                  const cleanTitle = documentTitle?.replace(/\.(pdf|md|txt)$/i, '') || 'Document';
-                  
-                  // Create content excerpt (first 200 chars with proper word break)
-                  let excerpt = src.content || '';
-                  if (excerpt.length > 200) {
-                    excerpt = excerpt.substring(0, 200);
-                    const lastSpace = excerpt.lastIndexOf(' ');
-                    if (lastSpace > 150) {
-                      excerpt = excerpt.substring(0, lastSpace);
+          <div className="mt-8">
+            <Separator className="mb-6" />
+            <Collapsible>
+              <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-3 rounded-lg hover:bg-muted/50">
+                <FileSearch className="w-4 h-4" />
+                <span>Research Sources ({msg.sources.length})</span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <div className="space-y-3">
+                  {msg.sources.map((src, i) => {
+                    // Extract clean metadata
+                    const metadata = src.metadata || {};
+                    const source = (metadata.source as string) || 'Unknown Document';
+                    const pageNum = (metadata.page_num as number) || (metadata.page as number);
+                    const documentTitle = source.includes('/') ? source.split('/').pop() : source;
+                    const cleanTitle = documentTitle?.replace(/\.(pdf|md|txt)$/i, '') || 'Document';
+                    
+                    // Minimal icons
+                    const getDocumentIcon = (title: string) => {
+                      if (title.toLowerCase().includes('framework')) return <Target className="w-3 h-3" />;
+                      if (title.toLowerCase().includes('recommendation')) return <Lightbulb className="w-3 h-3" />;
+                      if (title.toLowerCase().includes('analysis')) return <BarChart3 className="w-3 h-3" />;
+                      if (title.toLowerCase().includes('guide')) return <BookOpen className="w-3 h-3" />;
+                      return <FileText className="w-3 h-3" />;
+                    };
+                    
+                    // Create content excerpt (first 180 chars with proper word break)
+                    let excerpt = src.content || '';
+                    if (excerpt.length > 180) {
+                      excerpt = excerpt.substring(0, 180);
+                      const lastSpace = excerpt.lastIndexOf(' ');
+                      if (lastSpace > 130) {
+                        excerpt = excerpt.substring(0, lastSpace);
+                      }
+                      excerpt += '...';
                     }
-                    excerpt += '...';
-                  }
-                  
-                  return (
-                    <div key={src.id || i} className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-100 rounded-lg p-3 text-sm">
-                      {/* Source header */}
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 text-xs mb-1">
-                            📄 {cleanTitle}
-                          </h4>
-                          <div className="flex items-center gap-2 text-xs text-gray-600">
-                            {pageNum && (
-                              <span className="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[10px] font-medium">
-                                Page {pageNum}
-                              </span>
-                            )}
-                            {typeof metadata.similarity === 'number' && (
-                              <span className="text-gray-500 text-[10px]">
-                                {Math.round(metadata.similarity * 100)}% match
-                              </span>
-                            )}
+                    
+                    return (
+                      <Card key={src.id || i} className="bg-muted/50 border-border">
+                        <CardContent className="p-3">
+                          <div className="flex items-start gap-3">
+                            <div className="text-muted-foreground mt-1">
+                              {getDocumentIcon(cleanTitle)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs font-medium text-foreground mb-1">
+                                {cleanTitle}
+                                {pageNum && (
+                                  <span className="text-muted-foreground font-normal ml-2">
+                                    p. {pageNum}
+                                  </span>
+                                )}
+                              </h4>
+                              <p className="text-xs text-muted-foreground leading-relaxed">
+                                {excerpt}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      
-                      {/* Content excerpt */}
-                      <div className="border-l-2 border-emerald-200 pl-2">
-                        <div className="text-gray-700 text-xs leading-relaxed italic">
-                          &ldquo;{excerpt}&rdquo;
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
         )}
 
         {/* Asset allocation chart */}
         {msg.allocationData && (
-          <div className="mt-2 pt-2 border-t border-gray-200">
+          <div className="mt-6">
+            <Separator className="mb-4" />
             <AssetAllocationChart data={msg.allocationData.etfs} />
           </div>
         )}
 
-        {/* Timestamp */}
-        <div className={`text-[10px] mt-1 text-right ${
-          msg.role === 'user' ? 'text-gray-300' : 'text-gray-400'
+        {/* Enhanced Timestamp */}
+        <div className={`text-[11px] mt-4 text-right ${
+          msg.role === 'user' 
+            ? 'text-emerald-100' 
+            : 'text-gray-500'
         }`}>
           {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </div>
         </div>
       </div>
     );
@@ -253,55 +385,28 @@ const MessageListComponent: React.FC<MessageListProps> = ({
   }, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 pb-2 space-y-4 bg-white">
+    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gray-50">
       {uniqueMessages.map((msg) => (
         <div 
           key={msg.id} 
-          className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          className="w-full animate-fade-in"
         >
-          {/* Bot avatar */}
-          {msg.role === 'bot' && (
-            <Avatar className="h-6 w-6 mr-2 bg-gray-100 mt-auto">
-              <AvatarFallback className="bg-gray-100">
-                <BotMessageSquare className="h-4 w-4 text-emerald-600" />
-              </AvatarFallback>
-            </Avatar>
-          )}
-          
-          {/* Message content */}
+          {/* Message content with enhanced styling */}
           {renderMessage(msg)}
-          
-          {/* User avatar */}
-          {msg.role === 'user' && (
-            <Avatar className="h-6 w-6 ml-2 bg-gray-100 mt-auto">
-              {userAvatarUrl ? (
-                <AvatarImage src={userAvatarUrl} alt="User avatar" />
-              ) : (
-                <AvatarFallback className="bg-gray-100">
-                  <User className="h-4 w-4 text-emerald-600" />
-                </AvatarFallback>
-              )}
-            </Avatar>
-          )}
         </div>
       ))}
 
       {/* Enhanced API Warming Up indicator */}
       {isWarmingUp && !loading && (
-        <div className="w-full space-y-4">
-          <div className="flex w-full justify-start">
-            <Avatar className="h-6 w-6 mr-2 bg-gray-100 mt-auto">
-              <AvatarFallback className="bg-gray-100">
-                <BotMessageSquare className="h-4 w-4 text-emerald-600" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="max-w-[85%]">
+        <div className="w-full space-y-6 animate-fade-in">
+          <div className="flex justify-start">
+            <div className="bg-gray-100 text-gray-900 rounded-2xl rounded-tl-md w-full px-4 py-3 transition-all duration-200">
               <WarmingProgress status={warmingStatus} isVisible={true} />
             </div>
           </div>
           
           {onSuggestedPrompt && (
-            <div className="px-8">
+            <div className="px-2">
               <WarmingSuggestions 
                 isVisible={true} 
                 onSelectSuggestion={onSuggestedPrompt}
@@ -311,16 +416,13 @@ const MessageListComponent: React.FC<MessageListProps> = ({
         </div>
       )}
 
-      {/* Loading indicator */}
+      {/* Enhanced loading indicator */}
       {loading && !isWarmingUp && (
-        <div className="flex w-full justify-start">
-          <Avatar className="h-6 w-6 mr-2 bg-gray-100 mt-auto">
-            <AvatarFallback className="bg-gray-100">
-              <BotMessageSquare className="h-4 w-4 text-emerald-600" />
-            </AvatarFallback>
-          </Avatar>
-          <div className="rounded-2xl px-4 py-3 max-w-[85%] shadow-sm text-sm bg-gray-50 text-gray-900 border border-gray-100 animate-scale-in">
-            <ThinkingShimmer />
+        <div className="w-full animate-fade-in">
+          <div className="flex justify-start">
+            <div className="bg-gray-100 text-gray-900 rounded-2xl rounded-tl-md w-full px-4 py-3 transition-all duration-200">
+              <ThinkingShimmer />
+            </div>
           </div>
         </div>
       )}
