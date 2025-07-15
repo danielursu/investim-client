@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ReactNode, useState, useEffect, useRef, useCallback } from "react";
+import { ReactNode, useState, useCallback } from "react";
 import { Plus } from "lucide-react";
 
 interface GoalDisplayCardProps {
@@ -15,6 +15,7 @@ interface GoalDisplayCardProps {
   description?: string;
   isAddCard?: boolean;
   onClick?: () => void;
+  onAddGoal?: () => void;
 }
 
 function GoalDisplayCard({
@@ -28,6 +29,7 @@ function GoalDisplayCard({
   description,
   isAddCard = false,
   onClick,
+  onAddGoal,
 }: GoalDisplayCardProps) {
   // Create progress description
   const progressDescription = description || `${currentAmount} of ${targetAmount} (${progressPercent}%)`;
@@ -66,7 +68,13 @@ function GoalDisplayCard({
         
         {/* Bottom section with icon and text */}
         <div>
-          <span className="relative inline-block rounded-full p-2 bg-emerald-100 border border-emerald-200">
+          <span 
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddGoal?.();
+            }}
+            className="relative inline-block rounded-full p-2 bg-emerald-100 border border-emerald-200 cursor-pointer hover:bg-emerald-200 transition-colors"
+          >
             <Plus className="h-4 w-4 text-emerald-600" />
           </span>
           <p className="text-base font-semibold text-emerald-700">Add New Goal</p>
@@ -77,8 +85,9 @@ function GoalDisplayCard({
 
   return (
     <div
+      onClick={onClick}
       className={cn(
-        "relative flex h-28 w-[260px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-gray-200 bg-white/90 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-gray-300 hover:bg-white overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2",
+        "relative flex h-28 w-[260px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-gray-200 bg-white/90 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-gray-300 hover:bg-white overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2 cursor-pointer",
         className
       )}
     >
@@ -125,9 +134,6 @@ interface GoalDisplayCardsProps {
 export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const startX = useRef(0);
-  const isDragging = useRef(false);
   
   // Handle infinite scrolling with smooth transitions
   const handleNext = useCallback(() => {
@@ -136,95 +142,7 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
     setSelectedIndex((prev) => (prev + 1) % goals.length);
     setTimeout(() => setIsTransitioning(false), 500);
   }, [goals.length, isTransitioning]);
-  
-  const handlePrev = useCallback(() => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setSelectedIndex((prev) => (prev - 1 + goals.length) % goals.length);
-    setTimeout(() => setIsTransitioning(false), 500);
-  }, [goals.length, isTransitioning]);
 
-  // Touch/Mouse swipe handling with velocity detection
-  const handleStart = (clientX: number) => {
-    if (isTransitioning) return;
-    startX.current = clientX;
-    isDragging.current = true;
-  };
-
-  const handleEnd = (clientX: number) => {
-    if (!isDragging.current || isTransitioning) return;
-    
-    const diff = startX.current - clientX;
-    const threshold = 30; // reduced threshold for more responsive swiping
-    
-    if (Math.abs(diff) > threshold) {
-      if (diff > 0) {
-        handlePrev(); // Swipe left
-      } else {
-        handleNext(); // Swipe right
-      }
-    }
-    
-    isDragging.current = false;
-  };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        handlePrev();
-      } else if (e.key === 'ArrowRight') {
-        handleNext();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleNext, handlePrev]);
-
-  // Subtle hint animation - only show once per session, persisted globally
-  const [showHint, setShowHint] = useState(false);
-  const [hasShownHint, setHasShownHint] = useState(() => {
-    // Check localStorage to see if hint was already shown
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('goalCardsHintShown') === 'true';
-    }
-    return false;
-  });
-  
-  useEffect(() => {
-    // Hide hint after first interaction
-    if (selectedIndex !== 0) {
-      setShowHint(false);
-      setHasShownHint(true);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('goalCardsHintShown', 'true');
-      }
-    }
-  }, [selectedIndex]);
-  
-  useEffect(() => {
-    // Only show hint once on initial mount and never again
-    // Also check if we're in a visible state (not hidden by chat)
-    if (goals.length > 1 && !hasShownHint && document.visibilityState === 'visible') {
-      const timer = setTimeout(() => {
-        // Double-check we're still visible and not in chat mode
-        if (document.visibilityState === 'visible' && !document.querySelector('[data-chat-active="true"]')) {
-          setShowHint(true);
-          // Auto-hide after animation completes
-          setTimeout(() => {
-            setShowHint(false);
-            setHasShownHint(true);
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('goalCardsHintShown', 'true');
-            }
-          }, 3500);
-        }
-      }, 1500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [goals.length, hasShownHint]);
 
 
   if (goals.length === 0) {
@@ -240,12 +158,7 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
 
   return (
     <div 
-      ref={containerRef}
       className={cn("relative w-full overflow-x-hidden", className)}
-      onMouseDown={(e) => handleStart(e.clientX)}
-      onMouseUp={(e) => handleEnd(e.clientX)}
-      onTouchStart={(e) => handleStart(e.touches[0].clientX)}
-      onTouchEnd={(e) => e.changedTouches[0] && handleEnd(e.changedTouches[0].clientX)}
     >
       <div className="relative flex justify-end items-center min-h-[225px] overflow-x-hidden overflow-y-visible pt-18 pr-8">
         {/* Static stack of cards */}
@@ -257,13 +170,14 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
               style={{
                 transform: `translateX(${-index * 25}px) translateY(${-index * 35 + 20}px)`,
                 zIndex: 30 - (index * 10),
-                opacity: index === 0 ? 1 : index === 1 ? 0.98 : 0.95,
+                opacity: index === 0 ? 0.98 : index === 1 ? 0.96 : 0.94,
               }}
             >
               <div className="relative">
                 <GoalDisplayCard 
                   {...goal}
-                  onClick={index === 0 && goal.isAddCard ? goal.onClick : undefined}
+                  onClick={index === 0 ? handleNext : undefined}
+                  onAddGoal={index === 0 && goal.isAddCard ? goal.onClick : undefined}
                   className={cn(
                     "transition-all duration-300 ease-out",
                     index === 0 ? "cursor-pointer" : "pointer-events-none",
@@ -278,16 +192,6 @@ export function GoalDisplayCards({ goals = [], className }: GoalDisplayCardsProp
         </div>
       </div>
       
-      {/* Swipe hint above slider */}
-      {showHint && goals.length > 1 && (
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 pointer-events-none z-50">
-          <div className="animate-slide-finger">
-            <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
-              <span className="text-xl text-white">👆</span>
-            </div>
-          </div>
-        </div>
-      )}
       
       {/* Minimalist infinite slider */}
       {goals.length > 1 && (

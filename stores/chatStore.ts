@@ -361,6 +361,30 @@ export const useChatStore = create<ChatStore>()(
           // Only persist messages if user has enabled history persistence
           messages: state.preferences.persistHistory ? state.messages : [],
         }),
+        // Handle Date object serialization/deserialization
+        storage: {
+          getItem: (name) => {
+            const str = localStorage.getItem(name);
+            if (!str) return null;
+            const parsed = JSON.parse(str);
+            
+            // Convert timestamp strings back to Date objects
+            if (parsed.state?.messages) {
+              parsed.state.messages = parsed.state.messages.map((msg: any) => ({
+                ...msg,
+                timestamp: new Date(msg.timestamp)
+              }));
+            }
+            
+            return parsed;
+          },
+          setItem: (name, value) => {
+            localStorage.setItem(name, JSON.stringify(value));
+          },
+          removeItem: (name) => {
+            localStorage.removeItem(name);
+          },
+        },
       }
     ),
     {
