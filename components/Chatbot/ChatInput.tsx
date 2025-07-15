@@ -103,18 +103,18 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
     <div className="bg-gray-50">
       {/* Enhanced Prompt Suggestions */}
       {showSuggestions && (
-        <div className="px-6 py-5 border-t border-gray-200 bg-gray-100/50">
-          <div className="mb-3">
+        <div className="px-4 py-3 border-t border-gray-200 bg-gray-100/50">
+          <div className="mb-2">
             <span className="text-xs font-medium text-muted-foreground tracking-wide uppercase">
               Suggested Questions
             </span>
           </div>
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             {filteredSuggestions.slice(0, 5).map(suggestion => (
               <Badge
                 key={suggestion.id}
                 variant="outline"
-                className="cursor-pointer hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-200 whitespace-nowrap text-xs py-2 px-4 rounded-full shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                className="cursor-pointer border border-emerald-600 text-emerald-700 font-normal hover:bg-emerald-50 hover:border-emerald-700 transition-all duration-200 whitespace-nowrap text-xs py-2 px-4 rounded-full"
                 onClick={() => handleSuggestionClick(suggestion.text)}
               >
                 {suggestion.text}
