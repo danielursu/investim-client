@@ -271,7 +271,7 @@ const MessageListComponent: React.FC<MessageListProps> = ({
       }`}>
         <div className={`${
           msg.role === 'user' 
-            ? 'bg-emerald-500 text-white rounded-2xl rounded-tr-md max-w-[80%]' 
+            ? 'bg-emerald-500 text-white rounded-2xl rounded-tr-md max-w-[80%] break-words overflow-wrap-anywhere' 
             : 'bg-gray-100 text-gray-900 rounded-2xl rounded-tl-md w-full'
         } px-4 py-3 transition-all duration-200`}>
         <Suspense fallback={<TextFallback content={sanitizeMarkdown(msg.content)} />}>
@@ -283,15 +283,15 @@ const MessageListComponent: React.FC<MessageListProps> = ({
 
         {/* Enhanced Sources section */}
         {msg.sources && msg.sources.length > 0 && (
-          <div className="mt-8">
-            <Separator className="mb-6" />
+          <div className="mt-4">
+            <Separator className="mb-3" />
             <Collapsible>
               <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-3 rounded-lg hover:bg-muted/50">
                 <FileSearch className="w-4 h-4" />
                 <span>Research Sources ({msg.sources.length})</span>
               </CollapsibleTrigger>
-              <CollapsibleContent className="mt-4">
-                <div className="space-y-3">
+              <CollapsibleContent className="mt-2">
+                <div className="space-y-2">
                   {msg.sources.map((src, i) => {
                     // Extract clean metadata
                     const metadata = src.metadata || {};
@@ -360,7 +360,7 @@ const MessageListComponent: React.FC<MessageListProps> = ({
         )}
 
         {/* Enhanced Timestamp */}
-        <div className={`text-[11px] mt-4 text-right ${
+        <div className={`text-[11px] mt-1 text-right ${
           msg.role === 'user' 
             ? 'text-emerald-100' 
             : 'text-gray-500'
