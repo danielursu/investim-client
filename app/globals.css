@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import 'katex/dist/katex.min.css';
-
 html {
   overflow-x: hidden;
   max-width: 100vw;

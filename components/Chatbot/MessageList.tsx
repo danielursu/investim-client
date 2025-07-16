@@ -58,14 +58,9 @@ const LazyMarkdownRenderer = ({ content, isUser = false }: { content: string; is
         const [gfmModule, mathModule, katexModule] = await Promise.all([
           import('remark-gfm'),
           import('remark-math'), 
-          import('rehype-katex')
+          import('rehype-katex'),
+          import('@/lib/katex').then(({ loadKatexCss }) => loadKatexCss())
         ]);
-        
-        console.log('Math plugins loaded successfully:', {
-          gfm: !!gfmModule.default,
-          math: !!mathModule.default,
-          katex: !!katexModule.default
-        });
         
         setPlugins({ 
           gfm: gfmModule.default, 
