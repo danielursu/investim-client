@@ -56,10 +56,10 @@ function GoalDisplayCard({
       <div
         onClick={onClick}
         className={cn(
-          "relative flex h-28 w-[260px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-dashed border-emerald-400/70 bg-emerald-50/80 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-emerald-500 cursor-pointer overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2 shadow-lg shadow-emerald-100/50",
+          "relative flex h-28 w-[260px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-dashed border-emerald-400/70 bg-emerald-50/90 backdrop-blur-2xl px-4 py-3 transition-all duration-700 cursor-pointer overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2 shadow-lg shadow-emerald-100/50",
           className
         )}
-      >
+        >
         {/* Empty top section */}
         <div></div>
         
@@ -87,7 +87,7 @@ function GoalDisplayCard({
     <div
       onClick={onClick}
       className={cn(
-        "relative flex h-28 w-[260px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-gray-200 bg-white/90 backdrop-blur-sm px-4 py-3 transition-all duration-700 hover:border-gray-300 hover:bg-white overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2 cursor-pointer",
+        "relative flex h-28 w-[260px] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 border-gray-200 bg-white/95 backdrop-blur-2xl px-4 py-3 transition-all duration-700 overflow-hidden [&>*]:flex [&>*]:items-center [&>*]:gap-2 cursor-pointer shadow-lg shadow-gray-100/50",
         className
       )}
     >

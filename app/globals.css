@@ -188,4 +188,67 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Comprehensive fallback styles for markdown content */
+  .markdown-content {
+    line-height: 1.6;
+  }
+  
+  .markdown-content li {
+    display: list-item;
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Ensure lists display properly even without component styling */
+  .markdown-content ul {
+    list-style-type: disc;
+    list-style-position: outside;
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .markdown-content ol {
+    list-style-type: decimal;
+    list-style-position: outside;
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Nested list styles */
+  .markdown-content ul ul {
+    list-style-type: circle;
+    margin-left: 2.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .markdown-content ul ul ul {
+    list-style-type: square;
+    margin-left: 3.5rem;
+  }
+  
+  .markdown-content ol ol {
+    list-style-type: lower-alpha;
+    margin-left: 2.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .markdown-content ol ol ol {
+    list-style-type: lower-roman;
+    margin-left: 3.5rem;
+  }
+  
+  /* Ensure proper spacing */
+  .markdown-content ul:first-child,
+  .markdown-content ol:first-child {
+    margin-top: 0;
+  }
+  
+  .markdown-content ul:last-child,
+  .markdown-content ol:last-child {
+    margin-bottom: 0;
+  }
 }

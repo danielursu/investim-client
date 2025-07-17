@@ -8,6 +8,10 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "*.{js,ts,jsx,tsx,mdx}"
   ],
+  safelist: [
+    // Basic spacing classes used in components
+    'space-y-1', 'my-2', 'text-sm', 'leading-relaxed'
+  ],
   theme: {
   	screens: {
   		// Disable all responsive breakpoints for mobile-only design

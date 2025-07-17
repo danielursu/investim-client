@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { RiskQuizQuestion } from '@/components/RiskQuizQuestion';
 import { AssetAllocationChart } from '@/components/ui/AssetAllocationChart';
-import { sanitizeMarkdown, sanitizeSourceContent } from '@/lib/sanitize';
+import { sanitizeMarkdown } from '@/lib/sanitize';
 import { ChatMessage } from '@/types';
 import { ThinkingShimmer } from '@/components/ui/thinking-shimmer';
 import { WarmingProgress } from '@/components/ui/warming-progress';
@@ -25,28 +25,22 @@ const TextFallback = ({ content }: { content: string }) => (
   </div>
 );
 
-// Enhanced text processing that emphasizes important investment concepts
+
+// Simplified text processing that only emphasizes important investment concepts
 const processInvestmentContent = (content: string): string => {
-  // Enhanced processing - emphasize key investment terms and strategies
+  // Apply emphasis to key financial terms without restructuring content
   let processedContent = content
-    // Emphasize key investment terms and concepts for better readability
+    // Apply emphasis to key terms
     .replace(/\b(ETF|ETFs|Exchange-Traded Funds?|diversification|portfolio|asset allocation|expense ratio|liquidity|transparency|risk tolerance|investment strategy|market volatility|compound interest|dividend|yield|growth|value|index fund|mutual fund|bonds|stocks|securities|emergency fund|retirement|401k|IRA|Roth IRA|financial goals|time horizon|inflation)\b/gi, '**$1**')
-    
-    // Emphasize important financial concepts and advice
-    .replace(/\b(start investing|dollar-cost averaging|long-term|short-term|high-risk|low-risk|moderate risk|conservative|aggressive|balanced|rebalancing)\b/gi, '**$1**')
-    
-    // Preserve original bullet points and numbers exactly as they come from RAG
-    // Just ensure consistent markdown formatting
-    .replace(/^\* /gm, '- ')  // Convert * to - for consistency
-    .replace(/^• /gm, '- ')   // Convert • to - for consistency
-    
+    .replace(/\b(start investing|dollar-cost averaging|long-term|short-term|high-risk|low-risk|moderate risk|conservative|aggressive|balanced|rebalancing|consistent habits|clear goals|smart diversification)\b/gi, '**$1**')
+    .replace(/\b(Recency Bias|Herd Mentality|FOMO|Focus on the Plan|Diversify Thoughtfully|Automate Contributions|Align With Specific Goals|Embrace Rebalancing Discipline|Avoid Herd Mentality|Prepare for Crashes)\b/g, '**$1**')
     // Clean up excessive spacing
     .replace(/\n\n\n+/g, '\n\n')
-    .replace(/  +/g, ' ')
     .trim();
   
   return processedContent;
 };
+
 
 // Lazy markdown renderer that dynamically imports plugins
 const LazyMarkdownRenderer = ({ content, isUser = false }: { content: string; isUser?: boolean }) => {
@@ -84,9 +78,9 @@ const LazyMarkdownRenderer = ({ content, isUser = false }: { content: string; is
   try {
     return (
       <ReactMarkdown
-        remarkPlugins={[plugins.gfm, plugins.math]}
-        rehypePlugins={[plugins.katex]}
-        components={{
+          remarkPlugins={[plugins.gfm, plugins.math]}
+          rehypePlugins={[plugins.katex]}
+          components={{
           // Simple, clean typography hierarchy with ultra-tight spacing
           h1: ({ node, ...props }) => (
             <h1 {...props} className="text-lg font-semibold text-foreground mt-4 mb-2 first:mt-0" />
@@ -166,25 +160,44 @@ const LazyMarkdownRenderer = ({ content, isUser = false }: { content: string; is
             return <code {...props} />;
           },
           
-          // Simple, clean list styling with ultra-tight spacing
-          ul: ({ node, ...props }) => {
-            const { ordered, ...cleanProps } = props;
+          // List components with proper styling
+          ul: ({ node, depth, ordered, ...props }) => {
+            const depthLevel = depth || 0;
+            const baseMargin = 24; // 1.5rem in px
+            const nestingIncrement = 16; // 1rem in px
+            const marginLeft = baseMargin + (depthLevel * nestingIncrement);
+            const listStyleTypes = ['disc', 'circle', 'square'];
+            const listStyleType = listStyleTypes[Math.min(depthLevel, 2)];
+            
             return (
-              <ul {...cleanProps} className="list-disc ml-8 pl-4 space-y-0.5 mb-2 text-sm" />
+              <ul {...props} className="space-y-1 my-2" style={{
+                listStyleType: listStyleType,
+                listStylePosition: 'outside',
+                marginLeft: `${marginLeft}px`,
+                paddingLeft: '0px'
+              }} />
             );
           },
-          ol: ({ node, ...props }) => {
-            const { ordered, ...cleanProps } = props;
+          ol: ({ node, depth, ordered, start, ...props }) => {
+            const depthLevel = depth || 0;
+            const baseMargin = 24; // 1.5rem in px
+            const nestingIncrement = 16; // 1rem in px
+            const marginLeft = baseMargin + (depthLevel * nestingIncrement);
+            const listStyleTypes = ['decimal', 'lower-alpha', 'lower-roman'];
+            const listStyleType = listStyleTypes[Math.min(depthLevel, 2)];
+            
             return (
-              <ol {...cleanProps} className="list-decimal ml-8 pl-4 space-y-0.5 mb-2 text-sm" />
+              <ol {...props} className="space-y-1 my-2" style={{
+                listStyleType: listStyleType,
+                listStylePosition: 'outside',
+                marginLeft: `${marginLeft}px`,
+                paddingLeft: '0px'
+              }} />
             );
           },
-          li: ({ node, ...props }) => {
-            const { ordered, ...cleanProps } = props;
-            return (
-              <li {...cleanProps} className={`leading-normal pl-2 ${isUser ? 'text-white marker:text-white/70' : 'text-gray-900 marker:text-gray-700'}`} />
-            );
-          },
+          li: ({ node, ordered, ...props }) => (
+            <li {...props} className="text-sm leading-relaxed" />
+          ),
           
           // Horizontal rule for section breaks
           hr: ({ node, ...props }) => (
@@ -209,7 +222,7 @@ const LazyMarkdownRenderer = ({ content, isUser = false }: { content: string; is
         }}
       >
         {content}
-      </ReactMarkdown>
+        </ReactMarkdown>
     );
   } catch (error) {
     console.error('Error rendering markdown with math:', error);
@@ -242,6 +255,7 @@ const MessageListComponent: React.FC<MessageListProps> = ({
   warmingStatus,
   onSuggestedPrompt,
 }) => {
+  
   // Display error as toast notification
   useEffect(() => {
     if (error) {
@@ -272,12 +286,14 @@ const MessageListComponent: React.FC<MessageListProps> = ({
             ? 'bg-emerald-500 text-white rounded-2xl rounded-tr-md max-w-[80%] break-words overflow-wrap-anywhere' 
             : 'bg-gray-100 text-gray-900 rounded-2xl rounded-tl-md w-full'
         } px-4 py-3 transition-all duration-200`}>
-        <Suspense fallback={<TextFallback content={sanitizeMarkdown(msg.content)} />}>
-          <LazyMarkdownRenderer 
-            content={processInvestmentContent(sanitizeMarkdown(msg.content))} 
-            isUser={msg.role === 'user'}
-          />
-        </Suspense>
+        <div className="markdown-content">
+          <Suspense fallback={<TextFallback content={sanitizeMarkdown(msg.content)} />}>
+            <LazyMarkdownRenderer 
+              content={processInvestmentContent(sanitizeMarkdown(msg.content))} 
+              isUser={msg.role === 'user'}
+            />
+          </Suspense>
+        </div>
 
         {/* Enhanced Sources section */}
         {msg.sources && msg.sources.length > 0 && (

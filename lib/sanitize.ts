@@ -121,8 +121,10 @@ export const cleanRAGContent = (content: string): string => {
     .replace(/\s+\[\d+\](?=[\.\,\;\:]?\s|$)/g, '')
     // Remove any remaining citation brackets in the middle of text
     .replace(/\[\d+\]/g, '')
-    // Clean up bullet points and formatting
-    .replace(/^\s*[\*\-\+]\s+/gm, '• ')
+    // Normalize bullet points to markdown standard while preserving indentation
+    .replace(/^(\s*)[\*\+]\s+/gm, '$1- ')
+    // Ensure numbered lists are properly formatted
+    .replace(/^(\s*)(\d+)[\.\)]\s+/gm, '$1$2. ')
     .trim();
   
   // Restore math expressions
